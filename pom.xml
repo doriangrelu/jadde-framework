@@ -23,10 +23,12 @@
         <vertx.version>4.2.7</vertx.version>
         <reflections.version>0.10.2</reflections.version>
         <assertj-core.version>3.22.0</assertj-core.version>
+        <dagger.version>1.2.5</dagger.version>
     </properties>
 
     <modules>
         <module>jadde-app</module>
+        <module>jadde-container</module>
     </modules>
 
     <dependencies>
@@ -52,6 +54,17 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.squareup.dagger</groupId>
+                <artifactId>dagger</artifactId>
+                <version>${dagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.dagger</groupId>
+                <artifactId>dagger-compiler</artifactId>
+                <version>${dagger.version}</version>
+                <optional>true</optional>
+            </dependency>
             <dependency>
                 <groupId>org.reflections</groupId>
                 <artifactId>reflections</artifactId>
