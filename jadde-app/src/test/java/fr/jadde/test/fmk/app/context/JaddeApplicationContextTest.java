@@ -3,7 +3,6 @@ package fr.jadde.test.fmk.app.context;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
 import io.vertx.core.Vertx;
 import org.assertj.core.api.Assertions;
-import org.assertj.core.util.Maps;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;

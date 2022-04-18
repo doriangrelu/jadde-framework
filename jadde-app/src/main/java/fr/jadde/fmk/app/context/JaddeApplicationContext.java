@@ -3,7 +3,6 @@ package fr.jadde.fmk.app.context;
 import io.vertx.core.Vertx;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -11,6 +10,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+/**
+ * Represents the current application context
+ * It's provide VertX instance, parsed arguments list and current application FQN
+ *
+ * @author Dorian GRELU
+ * @version Avril. 2022
+ */
 public class JaddeApplicationContext {
 
     public static final Pattern ARGUMENT_PATTERN = Pattern
@@ -22,28 +28,61 @@ public class JaddeApplicationContext {
 
     private final Map<String, String> arguments;
 
+    /**
+     * Constructor
+     *
+     * @param applicationClassName current application FQN
+     * @param vertx                current VertX instance
+     */
     private JaddeApplicationContext(Class<?> applicationClassName, final Vertx vertx) {
         this.applicationClassName = applicationClassName;
         this.vertx = vertx;
         this.arguments = new ConcurrentHashMap<>();
     }
 
+    /**
+     * Current application FQN
+     *
+     * @return FQN
+     */
     public Class<?> applicationClassName() {
         return applicationClassName;
     }
 
+    /**
+     * Current VertX instance
+     *
+     * @return VertX
+     */
     public Vertx vertx() {
         return vertx;
     }
 
+    /**
+     * All arguments (unmodifiable Map)
+     *
+     * @return Unmodifiable Map
+     */
     public Map<String, String> arguments() {
         return Collections.unmodifiableMap(this.arguments);
     }
 
+    /**
+     * The associated key => value argument
+     *
+     * @param key target key
+     * @return optional argument
+     */
     public Optional<String> argument(final String key) {
         return Optional.ofNullable(this.arguments.get(key));
     }
 
+    /**
+     * Bind strings arguments
+     *
+     * @param arguments arguments array
+     * @return current instance (Fluent)
+     */
     public JaddeApplicationContext withArguments(String[] arguments) {
         Stream.of(arguments)
                 .forEach(arg -> {
@@ -55,7 +94,13 @@ public class JaddeApplicationContext {
         return this;
     }
 
-
+    /**
+     * Create the context
+     *
+     * @param applicationClassName from application FQN
+     * @param vertx                associated VertX instance
+     * @return new context instance
+     */
     public static JaddeApplicationContext create(final Class<?> applicationClassName, final Vertx vertx) {
         return new JaddeApplicationContext(applicationClassName, vertx);
     }
