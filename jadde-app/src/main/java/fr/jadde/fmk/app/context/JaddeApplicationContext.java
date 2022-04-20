@@ -1,5 +1,7 @@
 package fr.jadde.fmk.app.context;
 
+import fr.jadde.fmk.container.JaddeContainer;
+import fr.jadde.fmk.container.module.AbstractJaddeModule;
 import io.vertx.core.Vertx;
 
 import java.util.Collections;
@@ -26,6 +28,8 @@ public class JaddeApplicationContext {
 
     private final Vertx vertx;
 
+    private final JaddeContainer container;
+
     private final Map<String, String> arguments;
 
     /**
@@ -34,10 +38,11 @@ public class JaddeApplicationContext {
      * @param applicationClassName current application FQN
      * @param vertx                current VertX instance
      */
-    private JaddeApplicationContext(Class<?> applicationClassName, final Vertx vertx) {
+    private JaddeApplicationContext(Class<? extends AbstractJaddeModule> applicationClassName, final Vertx vertx) {
         this.applicationClassName = applicationClassName;
         this.vertx = vertx;
         this.arguments = new ConcurrentHashMap<>();
+        this.container = JaddeContainer.create();
     }
 
     /**
@@ -56,6 +61,15 @@ public class JaddeApplicationContext {
      */
     public Vertx vertx() {
         return vertx;
+    }
+
+    /**
+     * Current jadde container
+     *
+     * @return the current container
+     */
+    public JaddeContainer container() {
+        return container;
     }
 
     /**
@@ -101,7 +115,7 @@ public class JaddeApplicationContext {
      * @param vertx                associated VertX instance
      * @return new context instance
      */
-    public static JaddeApplicationContext create(final Class<?> applicationClassName, final Vertx vertx) {
+    public static JaddeApplicationContext create(final Class<? extends AbstractJaddeModule> applicationClassName, final Vertx vertx) {
         return new JaddeApplicationContext(applicationClassName, vertx);
     }
 

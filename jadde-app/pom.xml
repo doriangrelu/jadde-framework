@@ -13,6 +13,16 @@
 
     <dependencies>
         <dependency>
+            <groupId>fr.jadde</groupId>
+            <artifactId>jadde-container</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
         </dependency>

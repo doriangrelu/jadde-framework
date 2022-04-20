@@ -1,6 +1,7 @@
 package fr.jadde.test.fmk.app.context;
 
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import fr.jadde.fmk.container.module.AbstractJaddeModule;
 import io.vertx.core.Vertx;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Map;
 
-class JaddeApplicationContextTest {
+class JaddeApplicationContextTest extends AbstractJaddeModule {
 
     @Test
     void testCreateContextWithArguments() {

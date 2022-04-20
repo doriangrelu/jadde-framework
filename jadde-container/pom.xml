@@ -13,13 +13,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.squareup.dagger</groupId>
-            <artifactId>dagger</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.dagger</groupId>
-            <artifactId>dagger-compiler</artifactId>
-            <optional>true</optional>
+            <groupId>org.jboss.weld.se</groupId>
+            <artifactId>weld-se-shaded</artifactId>
+            <version>4.0.3.Final</version>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>

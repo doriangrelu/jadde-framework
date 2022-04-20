@@ -1,49 +1,62 @@
 package fr.jadde.fmk.container;
 
-import dagger.ObjectGraph;
 import fr.jadde.fmk.container.annotation.JaddeModule;
-import fr.jadde.fmk.container.tools.ClassConstructor;
+import org.jboss.weld.bean.ManagedBean;
+import org.jboss.weld.bootstrap.spi.BeanDiscoveryMode;
+import org.jboss.weld.environment.se.Weld;
+import org.jboss.weld.environment.se.WeldContainer;
 
-import java.util.Map;
+import java.lang.annotation.Annotation;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JaddeContainer {
 
-    private final Map<Class<?>, Object> modules;
+    private final WeldContainer container;
 
-    private final Map<Class<?>, Object> managedObject;
-
-    private JaddeContainer() {
-        this.modules = new ConcurrentHashMap<>();
-        this.managedObject = new ConcurrentHashMap<>();
+    private JaddeContainer(WeldContainer container) {
+        this.container = container;
     }
 
     @SuppressWarnings("unchecked")
-    public JaddeContainer withModule(Class<?> moduleClassName) {
-        if (null != moduleClassName.getAnnotation(JaddeModule.class)) {
-            final Optional<Object> instance = ClassConstructor.<Object>createInstance((Class<Object>) moduleClassName);
-            instance.ifPresentOrElse(
-                    module -> this.modules.put(moduleClassName, module),
-                    () -> {
-                        //todo log
-                    }
-            );
-        } else {
-            // todo log
-        }
+    public <T> T resolve(final Annotation... annotations) {
+        return (T) this.container.select(annotations).get();
+    }
 
-        return this;
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> tryResolve(final Annotation... annotations) {
+        return Optional.ofNullable(this.resolve(annotations));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T resolve(final Class<?> className, final Annotation... annotations) {
+        return (T) this.container.select(className, annotations).get();
     }
 
 
-    public void start() {
-        final ObjectGraph graph = ObjectGraph.create(this.modules.values());
+    public <T> Optional<T> tryResolve(final Class<?> className, final Annotation... annotations) {
+        return Optional.ofNullable(this.resolve(className, annotations));
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public List<ManagedBean> resolveAll() {
+        return this.container.getBeanManager().getBeans(Object.class)
+                .stream()
+                .filter(ManagedBean.class::isInstance)
+                .map(ManagedBean.class::cast)
+                .filter(bean -> !bean.getBeanClass().isAnnotationPresent(JaddeModule.class))
+                .toList();
+    }
 
     public static JaddeContainer create() {
-        return new JaddeContainer();
+        final Weld weld = new Weld()
+                .enableDiscovery()
+                .setBeanDiscoveryMode(BeanDiscoveryMode.ANNOTATED)
+                .scanClasspathEntries();
+        return new JaddeContainer(weld.initialize());
     }
 
 }
