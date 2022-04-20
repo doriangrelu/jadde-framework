@@ -8,10 +8,7 @@ import org.jboss.weld.environment.se.WeldContainer;
 
 import java.lang.annotation.Annotation;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class JaddeContainer {
 
@@ -39,6 +36,10 @@ public class JaddeContainer {
 
     public <T> Optional<T> tryResolve(final Class<?> className, final Annotation... annotations) {
         return Optional.ofNullable(this.resolve(className, annotations));
+    }
+
+    public <T> List<T> resolveAll(final Class<T> targetClassName) {
+        return this.container.select(targetClassName).stream().toList();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

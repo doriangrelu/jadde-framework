@@ -1,52 +1,36 @@
 package fr.jadde.fmk.app.assembly;
 
-import fr.jadde.fmk.app.assembly.processor.JaddeGenericProcessorResolver;
+import fr.jadde.fmk.app.assembly.processor.JaddeProcessor;
 import fr.jadde.fmk.app.assembly.processor.api.JaddeAnnotationProcessor;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
-import fr.jadde.fmk.app.exception.PackageScanningException;
-import fr.jadde.fmk.app.reflection.JaddePackageScanner;
 import fr.jadde.fmk.container.annotation.JaddeModule;
-import fr.jadde.fmk.container.module.AbstractJaddeModule;
-import io.vertx.core.Vertx;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
+import io.vertx.core.json.Json;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
 @ApplicationScoped
 @JaddeModule
 public class JaddeApplicationAssembly {
 
+    private static final Logger logger = LoggerFactory.getLogger(JaddeApplicationAssembly.class);
+
+    @Inject
     private JaddeApplicationContext context;
 
-    private final Set<JaddeAnnotationProcessor> processors;
-
-    public JaddeApplicationAssembly() {
-        this.processors = new HashSet<>();
-    }
-
-    public JaddeApplicationAssembly withContext(final JaddeApplicationContext context) {
-        this.context = context;
-        return this;
-    }
-
-    public JaddeApplicationAssembly withProcessor(final JaddeAnnotationProcessor processor) {
-        processor.setContext(this.context);
-        this.processors.add(processor);
-        return this;
-    }
-
-    public JaddeApplicationContext context() {
-        return context;
-    }
-
-    public void start() {
-        final JaddeGenericProcessorResolver processorResolver = new JaddeGenericProcessorResolver(this.context, this.processors);
-        try {
-            processorResolver.handleResolve(JaddePackageScanner.scan(this.context.applicationClassName()));
-        } catch (PackageScanningException e) {
-            e.printStackTrace();
+    public void processAssembly() {
+        if (null == context) {
+            throw new IllegalStateException("Cannot start assembly, missing context");
         }
+        final List<JaddeAnnotationProcessor> processors = context.container().resolveAll(JaddeAnnotationProcessor.class);
+        logger.info("'" + processors.size() + "' founded, start application processing");
+        logger.debug("Processor list -> " + Json.encode(processors));
+
+        final JaddeProcessor processor = JaddeProcessor.create(processors);
+        processor.process(this.context);
     }
 
 }

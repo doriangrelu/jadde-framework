@@ -1,7 +1,7 @@
 package fr.jadde.test.fmk.app.context;
 
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
-import fr.jadde.fmk.container.module.AbstractJaddeModule;
+import fr.jadde.fmk.app.JaddeApplication;
 import io.vertx.core.Vertx;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -9,12 +9,13 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Map;
 
-class JaddeApplicationContextTest extends AbstractJaddeModule {
+class JaddeApplicationContextTest extends JaddeApplication {
 
     @Test
     void testCreateContextWithArguments() {
-        final var context = JaddeApplicationContext
-                .create(JaddeApplicationContextTest.class, Vertx.vertx());
+        final var context = new JaddeApplicationContext()
+                .withApplicationClassName(JaddeApplicationContextTest.class)
+                .withVertX(Vertx.vertx());
 
         final String[] arguments = Arrays.asList("a=b", "b=b", "c=t.y.u", "d=6000", "...=090..").toArray(new String[0]);
 

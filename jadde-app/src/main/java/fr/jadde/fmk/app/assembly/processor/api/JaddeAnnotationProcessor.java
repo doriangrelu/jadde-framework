@@ -10,6 +10,6 @@ public interface JaddeAnnotationProcessor {
 
     void process(final Annotation annotation, final Object target);
 
-    boolean doesSupport(final Annotation annotation, final Object target);
+    boolean doesSupport(final Class<? extends Annotation> annotation, final Object target);
 
 }

@@ -1,13 +1,18 @@
 package fr.jadde.fmk.app.context;
 
+import fr.jadde.fmk.app.exception.ImmutableContextViolationException;
 import fr.jadde.fmk.container.JaddeContainer;
-import fr.jadde.fmk.container.module.AbstractJaddeModule;
+import fr.jadde.fmk.app.JaddeApplication;
 import io.vertx.core.Vertx;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
+import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -19,30 +24,44 @@ import java.util.stream.Stream;
  * @author Dorian GRELU
  * @version Avril. 2022
  */
+@ApplicationScoped
 public class JaddeApplicationContext {
+
+    private static final Logger logger = LoggerFactory.getLogger(JaddeApplicationContext.class);
 
     public static final Pattern ARGUMENT_PATTERN = Pattern
             .compile("^([a-z]+([a-z\\-\\.][a-z]+)*)=([a-z0-9]+([a-z\\-\\.][a-z0-9]+)*)$");
 
-    private final Class<?> applicationClassName;
+    private Class<?> applicationClassName;
 
-    private final Vertx vertx;
+    private Vertx vertx;
 
-    private final JaddeContainer container;
+    private JaddeContainer container;
 
-    private final Map<String, String> arguments;
+    private Map<String, String> arguments;
 
-    /**
-     * Constructor
-     *
-     * @param applicationClassName current application FQN
-     * @param vertx                current VertX instance
-     */
-    private JaddeApplicationContext(Class<? extends AbstractJaddeModule> applicationClassName, final Vertx vertx) {
-        this.applicationClassName = applicationClassName;
-        this.vertx = vertx;
+    private AtomicBoolean isBuild = new AtomicBoolean(false);
+
+    public JaddeApplicationContext() {
         this.arguments = new ConcurrentHashMap<>();
-        this.container = JaddeContainer.create();
+    }
+
+    public JaddeApplicationContext withContainer(final JaddeContainer container) {
+        this.checkBuildIntegrityOrFail();
+        this.container = container;
+        return this;
+    }
+
+    public JaddeApplicationContext withVertX(final Vertx vertx) {
+        this.checkBuildIntegrityOrFail();
+        this.vertx = vertx;
+        return this;
+    }
+
+    public JaddeApplicationContext withApplicationClassName(final Class<? extends JaddeApplication> applicationClassName) {
+        this.checkBuildIntegrityOrFail();
+        this.applicationClassName = applicationClassName;
+        return this;
     }
 
     /**
@@ -98,6 +117,7 @@ public class JaddeApplicationContext {
      * @return current instance (Fluent)
      */
     public JaddeApplicationContext withArguments(String[] arguments) {
+        this.checkBuildIntegrityOrFail();
         Stream.of(arguments)
                 .forEach(arg -> {
                     final Matcher argumentMatcher = ARGUMENT_PATTERN.matcher(arg);
@@ -108,15 +128,15 @@ public class JaddeApplicationContext {
         return this;
     }
 
-    /**
-     * Create the context
-     *
-     * @param applicationClassName from application FQN
-     * @param vertx                associated VertX instance
-     * @return new context instance
-     */
-    public static JaddeApplicationContext create(final Class<? extends AbstractJaddeModule> applicationClassName, final Vertx vertx) {
-        return new JaddeApplicationContext(applicationClassName, vertx);
+    public void finalise() {
+        logger.info("Context initialization successfully ended");
+        this.isBuild.set(true);
+    }
+
+    private void checkBuildIntegrityOrFail() {
+        if (Boolean.TRUE.equals(this.isBuild.get())) {
+            throw new ImmutableContextViolationException();
+        }
     }
 
 }
