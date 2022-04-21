@@ -16,7 +16,6 @@
             <groupId>fr.jadde</groupId>
             <artifactId>jadde-container</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
