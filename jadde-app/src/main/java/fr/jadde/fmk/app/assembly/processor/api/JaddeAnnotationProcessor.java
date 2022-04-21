@@ -4,12 +4,35 @@ import fr.jadde.fmk.app.context.JaddeApplicationContext;
 
 import java.lang.annotation.Annotation;
 
+/**
+ * Allows to define a bean processor
+ *
+ * @author Dorian GRELU
+ * @version Avril. 2022
+ */
 public interface JaddeAnnotationProcessor {
 
+    /**
+     * Sets the target application context.
+     * The context should not be Injected from container
+     *
+     * @param context target application context
+     */
     void setContext(final JaddeApplicationContext context);
 
-    void process(final Annotation annotation, final Object target);
+    /**
+     * Should process the target bean
+     *
+     * @param target target bean
+     */
+    void process(final Object target);
 
-    boolean doesSupport(final Class<? extends Annotation> annotation, final Object target);
+    /**
+     * Does support target bean processing
+     *
+     * @param target the target bean which be processed
+     * @return does support bean processing
+     */
+    boolean doesSupport(final Object target);
 
 }

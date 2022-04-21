@@ -8,19 +8,22 @@ import jakarta.enterprise.context.ApplicationScoped;
 import java.lang.annotation.Annotation;
 import java.util.UUID;
 
+/**
+ * @author Dorian GRELU
+ */
 @ApplicationScoped
 public class FakeProcessor extends AbstractJaddeAnnotationProcessor {
 
     @Override
-    public void process(Annotation annotation, Object target) {
+    public void process(Object target) {
         if (target instanceof MyFirstService myFirstService) {
             myFirstService.setContainerIdentifier(UUID.randomUUID().toString());
         }
     }
 
     @Override
-    public boolean doesSupport(Class<? extends Annotation> annotation, Object target) {
-        return annotation.equals(MyAnnot.class);
+    public boolean doesSupport(Object target) {
+        return target.getClass().isAnnotationPresent(MyAnnot.class);
     }
 
 }

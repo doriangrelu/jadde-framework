@@ -4,9 +4,12 @@ import fr.jadde.test.fmk.app.mock.annotation.MyAnnot;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+/**
+ * @author Dorian GRELU
+ */
 @ApplicationScoped
 @MyAnnot
-public class MyFirstService {
+public class MyFirstService  {
 
     private static String containerIdentifier;
 

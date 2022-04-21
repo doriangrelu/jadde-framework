@@ -12,6 +12,12 @@ import jakarta.inject.Inject;
 
 import java.util.List;
 
+/**
+ * Allows you to start the assembly of the VertX application
+ *
+ * @author Dorian GRELU
+ * @version Avril. 2022
+ */
 @ApplicationScoped
 @JaddeModule
 public class JaddeApplicationAssembly {

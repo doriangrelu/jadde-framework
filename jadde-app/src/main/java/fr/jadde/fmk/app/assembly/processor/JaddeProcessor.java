@@ -1,46 +1,65 @@
 package fr.jadde.fmk.app.assembly.processor;
 
-import fr.jadde.fmk.app.assembly.processor.annotation.RootJaddeAnnotation;
 import fr.jadde.fmk.app.assembly.processor.api.JaddeAnnotationProcessor;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import io.vertx.core.impl.logging.Logger;
+import io.vertx.core.impl.logging.LoggerFactory;
 import org.jboss.weld.bean.ManagedBean;
 
-import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
+/**
+ * Allows you to process a bean
+ *
+ * @author Dorian GRELU
+ * @version Avril. 2022
+ */
 public class JaddeProcessor {
+
+    public static final Logger logger = LoggerFactory.getLogger(JaddeProcessor.class);
 
     private final List<JaddeAnnotationProcessor> processors;
 
+    /**
+     * Ctor.
+     *
+     * @param processors available Jadde bean processors
+     */
     private JaddeProcessor(final List<JaddeAnnotationProcessor> processors) {
         this.processors = Collections.unmodifiableList(processors);
     }
 
+    /**
+     * Starts bean processing from application context
+     *
+     * @param context target application context
+     */
     @SuppressWarnings("rawtypes")
     public void process(final JaddeApplicationContext context) {
-        final List<ManagedBean> beans = context.container().resolveAll();
-        beans.parallelStream().forEach(bean -> this.processInstance(bean, processors));
-    }
-
-    private void processInstance(final ManagedBean<?> bean, final List<JaddeAnnotationProcessor> processors) {
-        final List<Annotation> annotations = this.resolveJaddeAnnotations(bean);
-        annotations.parallelStream().forEach(annotation -> {
-            processors.parallelStream()
-                    .filter(processor -> processor.doesSupport(annotation.annotationType(), bean))
-                    .forEach(processor -> processor.process(annotation, bean));
+        final List<ManagedBean> beans = context.container().resolveAllBeans();
+        beans.parallelStream().forEach(bean -> {
+            context.container().resolveRealInstance(bean.getBeanClass()).ifPresentOrElse(o -> {
+                logger.info("Start process '" + bean.getBeanClass() + "' processing");
+                this.processInstance(o, processors);
+            }, () -> logger.warn("Cannot process bean '" + bean.getBeanClass() + "' because missing in Jadde container"));
         });
     }
 
-    private List<Annotation> resolveJaddeAnnotations(final ManagedBean<?> bean) {
-        return Stream.of(bean.getBeanClass().getAnnotations()).filter(annotation -> {
-            return annotation.annotationType().isAnnotationPresent(RootJaddeAnnotation.class);
-        }).toList();
+    private void processInstance(final Object bean, final List<JaddeAnnotationProcessor> processors) {
+        processors.parallelStream()
+                .filter(processor -> processor.doesSupport(bean))
+                .forEach(processor -> processor.process(bean));
     }
 
+    /**
+     * The processor instanciator !
+     *
+     * @param processors target available processors
+     * @return the Jadde Processor ! 😍
+     */
     public static JaddeProcessor create(final List<JaddeAnnotationProcessor> processors) {
         return new JaddeProcessor(processors);
     }
-    
+
 }

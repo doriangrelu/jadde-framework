@@ -9,6 +9,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.Map;
 
+/**
+ * @author Dorian GRELU
+ */
 class JaddeApplicationContextTest extends JaddeApplication {
 
     @Test

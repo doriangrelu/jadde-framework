@@ -1,6 +1,8 @@
 package fr.jadde.fmk.container;
 
 import fr.jadde.fmk.container.annotation.JaddeModule;
+import jakarta.enterprise.context.spi.CreationalContext;
+import jakarta.enterprise.inject.spi.Bean;
 import org.jboss.weld.bean.ManagedBean;
 import org.jboss.weld.bootstrap.spi.BeanDiscoveryMode;
 import org.jboss.weld.environment.se.Weld;
@@ -42,8 +44,20 @@ public class JaddeContainer {
         return this.container.select(targetClassName).stream().toList();
     }
 
+    public <T> Optional<T> resolveRealInstance(final Class<?> targetClassName) {
+        final CreationalContext<T> ctx = this.container.getBeanManager().createCreationalContext(null);
+        final List<Bean<?>> types = this.container.getBeanManager().getBeans(targetClassName).stream().toList();
+
+        if (types.isEmpty()) {
+            return Optional.empty();
+        }
+        final Bean<T> bean = (Bean<T>) types.get(0);
+
+        return Optional.ofNullable(this.container.getBeanManager().getContext(bean.getScope()).get(bean, ctx));
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public List<ManagedBean> resolveAll() {
+    public List<ManagedBean> resolveAllBeans() {
         return this.container.getBeanManager().getBeans(Object.class)
                 .stream()
                 .filter(ManagedBean.class::isInstance)

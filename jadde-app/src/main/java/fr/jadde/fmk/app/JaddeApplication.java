@@ -8,6 +8,15 @@ import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 
+/**
+ * Allows you to launch a Jadde application.
+ * Will automatically trigger the IoC container and the deployment of Verticles (VertX).
+ * <p>
+ * The system works with processors that will wrap some actions and configurations
+ *
+ * @author Dorian GRELU
+ * @version Avril. 2022
+ */
 public class JaddeApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(JaddeApplication.class);
@@ -33,7 +42,6 @@ public class JaddeApplication {
     private static RuntimeException cannotStartError(final String message) {
         return new CannotStartApplicationException(message);
     }
-
 
 
 }
