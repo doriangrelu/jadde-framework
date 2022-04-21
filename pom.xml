@@ -9,6 +9,8 @@
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <name>JADDE :: FMK</name>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -32,6 +34,7 @@
     <modules>
         <module>jadde-app</module>
         <module>jadde-container</module>
+        <module>jadde-bundles</module>
     </modules>
 
     <dependencies>

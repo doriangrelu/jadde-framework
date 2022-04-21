@@ -11,6 +11,9 @@
 
     <artifactId>jadde-app</artifactId>
 
+    <name>JADDE :: FMK :: APPLICATION</name>
+
+
     <dependencies>
         <dependency>
             <groupId>fr.jadde</groupId>

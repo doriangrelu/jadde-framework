@@ -11,6 +11,8 @@
 
     <artifactId>jadde-container</artifactId>
 
+    <name>JADDE :: FMK :: CONTAINER</name>
+
     <dependencies>
         <dependency>
             <groupId>org.jboss.weld.se</groupId>
