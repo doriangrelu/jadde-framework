@@ -5,7 +5,6 @@ import fr.jadde.test.fmk.app.mock.annotation.MyAnnot;
 import fr.jadde.test.fmk.app.mock.services.MyFirstService;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.lang.annotation.Annotation;
 import java.util.UUID;
 
 /**

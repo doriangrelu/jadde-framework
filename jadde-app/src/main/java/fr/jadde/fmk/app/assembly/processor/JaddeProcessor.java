@@ -1,7 +1,10 @@
 package fr.jadde.fmk.app.assembly.processor;
 
+import fr.jadde.fmk.app.assembly.processor.api.AbstractJaddeAnnotationProcessor;
 import fr.jadde.fmk.app.assembly.processor.api.JaddeAnnotationProcessor;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import fr.jadde.fmk.app.middleware.api.JaddeApplicationMiddleware;
+import fr.jadde.fmk.app.tools.BeanUtils;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import org.jboss.weld.bean.ManagedBean;
@@ -17,7 +20,7 @@ import java.util.List;
  */
 public class JaddeProcessor {
 
-    public static final Logger logger = LoggerFactory.getLogger(JaddeProcessor.class);
+    private static final Logger logger = LoggerFactory.getLogger(JaddeProcessor.class);
 
     private final List<JaddeAnnotationProcessor> processors;
 
@@ -37,8 +40,7 @@ public class JaddeProcessor {
      */
     @SuppressWarnings("rawtypes")
     public void process(final JaddeApplicationContext context) {
-        final List<ManagedBean> beans = context.container().resolveAllBeans();
-        beans.parallelStream().forEach(bean -> {
+        BeanUtils.getSafeBeans(context, JaddeApplicationMiddleware.class).forEach(bean -> {
             context.container().resolveRealInstance(bean.getBeanClass()).ifPresentOrElse(o -> {
                 logger.info("Start process '" + bean.getBeanClass() + "' processing");
                 this.processInstance(o, processors);
