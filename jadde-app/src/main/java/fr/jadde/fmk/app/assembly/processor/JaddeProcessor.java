@@ -28,7 +28,7 @@ public class JaddeProcessor {
         final List<Annotation> annotations = this.resolveJaddeAnnotations(bean);
         annotations.parallelStream().forEach(annotation -> {
             processors.parallelStream()
-                    .filter(processor -> processor.doesSupport(annotation.getClass(), bean))
+                    .filter(processor -> processor.doesSupport(annotation.annotationType(), bean))
                     .forEach(processor -> processor.process(annotation, bean));
         });
     }

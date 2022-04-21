@@ -27,7 +27,7 @@ public class JaddeApplicationAssembly {
         }
         final List<JaddeAnnotationProcessor> processors = context.container().resolveAll(JaddeAnnotationProcessor.class);
         logger.info("'" + processors.size() + "' founded, start application processing");
-        logger.debug("Processor list -> " + Json.encode(processors));
+        logger.debug("Processor list -> " + Json.encode(processors.stream().map(Object::toString).toList()));
 
         final JaddeProcessor processor = JaddeProcessor.create(processors);
         processor.process(this.context);
