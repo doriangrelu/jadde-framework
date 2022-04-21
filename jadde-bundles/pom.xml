@@ -13,4 +13,8 @@
 
     <name>JADDE :: FMK :: BUNDLES</name>
 
+    <modules>
+        <module>jadde-web-bundle</module>
+    </modules>
+
 </project>
