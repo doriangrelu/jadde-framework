@@ -1,8 +1,7 @@
 package fr.jadde.fmk.bundle.web;
 
-import fr.jadde.fmk.app.assembly.processor.api.AbstractJaddeAnnotationProcessor;
+import fr.jadde.fmk.app.assembly.processor.api.AbstractJaddeBeanProcessor;
 import fr.jadde.fmk.bundle.web.annotation.RestController;
-import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Processes the web beans
@@ -10,8 +9,8 @@ import jakarta.enterprise.context.ApplicationScoped;
  * @author Dorian GRELU
  * @version Avril. 2022
  */
-@ApplicationScoped
-public class JaddeWebAnnotationProcessor extends AbstractJaddeAnnotationProcessor {
+public class JaddeWebProcessor extends AbstractJaddeBeanProcessor {
+
     @Override
     public void process(Object target) {
 
@@ -21,4 +20,5 @@ public class JaddeWebAnnotationProcessor extends AbstractJaddeAnnotationProcesso
     public boolean doesSupport(Object target) {
         return null != target && target.getClass().isAnnotationPresent(RestController.class);
     }
+
 }

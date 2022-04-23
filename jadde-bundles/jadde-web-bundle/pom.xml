@@ -30,6 +30,11 @@
             <artifactId>vertx-core</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-web</artifactId>
+            <version>4.2.7</version>
+        </dependency>
     </dependencies>
 
     <build>

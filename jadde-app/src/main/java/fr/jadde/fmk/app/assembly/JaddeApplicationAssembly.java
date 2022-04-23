@@ -1,10 +1,10 @@
 package fr.jadde.fmk.app.assembly;
 
 import fr.jadde.fmk.app.assembly.processor.JaddeProcessor;
-import fr.jadde.fmk.app.assembly.processor.api.JaddeAnnotationProcessor;
+import fr.jadde.fmk.app.assembly.processor.api.JaddeBeanProcessor;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
-import fr.jadde.fmk.app.middleware.JaddeApplicationDelegate;
-import fr.jadde.fmk.app.middleware.api.JaddeApplicationMiddleware;
+import fr.jadde.fmk.app.bundle.JaddeApplicationDelegate;
+import fr.jadde.fmk.app.bundle.api.JaddeApplicationBundle;
 import fr.jadde.fmk.container.annotation.JaddeBean;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -30,14 +30,14 @@ public class JaddeApplicationAssembly {
         }
 
         logger.info("Resolves beans processors");
-        final Set<JaddeAnnotationProcessor> processors = context.classpathResolver().resolveBySubtype(JaddeAnnotationProcessor.class)
+        final Set<JaddeBeanProcessor> processors = context.classpathResolver().resolveBySubtype(JaddeBeanProcessor.class)
                 .parallelStream()
                 .map(context.container()::getInstance)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
         logger.info("Resolves middlewares");
-        context.classpathResolver().resolveBySubtype(JaddeApplicationMiddleware.class)
+        context.classpathResolver().resolveBySubtype(JaddeApplicationBundle.class)
                 .parallelStream()
                 .forEach(context.container()::registerInstance);
 

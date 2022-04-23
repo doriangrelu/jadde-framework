@@ -9,7 +9,7 @@ import fr.jadde.fmk.app.context.JaddeApplicationContext;
  * @author Dorian GRELU
  * @version Avril. 2022
  */
-public abstract class AbstractJaddeAnnotationProcessor implements JaddeAnnotationProcessor {
+public abstract class AbstractJaddeBeanProcessor implements JaddeBeanProcessor {
 
     private JaddeApplicationContext context;
 

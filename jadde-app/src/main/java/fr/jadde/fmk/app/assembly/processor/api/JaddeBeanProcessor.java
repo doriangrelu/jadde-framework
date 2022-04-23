@@ -2,15 +2,13 @@ package fr.jadde.fmk.app.assembly.processor.api;
 
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
 
-import java.lang.annotation.Annotation;
-
 /**
  * Allows to define a bean processor
  *
  * @author Dorian GRELU
  * @version Avril. 2022
  */
-public interface JaddeAnnotationProcessor {
+public interface JaddeBeanProcessor {
 
     /**
      * Sets the target application context.

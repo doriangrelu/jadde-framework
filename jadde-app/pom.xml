@@ -16,6 +16,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-config</artifactId>
+            <version>4.2.7</version>
+        </dependency>
+        <dependency>
             <groupId>fr.jadde</groupId>
             <artifactId>jadde-container</artifactId>
             <version>${project.version}</version>

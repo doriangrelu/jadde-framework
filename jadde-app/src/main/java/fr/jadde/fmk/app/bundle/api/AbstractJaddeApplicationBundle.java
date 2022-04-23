@@ -1,4 +1,4 @@
-package fr.jadde.fmk.app.middleware.api;
+package fr.jadde.fmk.app.bundle.api;
 
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
 
@@ -7,14 +7,14 @@ import fr.jadde.fmk.app.context.JaddeApplicationContext;
  *
  * @author Dorian GRELU
  */
-public abstract class AbstractJaddeApplicationMiddleware implements JaddeApplicationMiddleware {
+public abstract class AbstractJaddeApplicationBundle implements JaddeApplicationBundle {
 
     private static final boolean DEFAULT_VALUE = true;
-    private JaddeApplicationMiddleware nextMiddleware;
+    private JaddeApplicationBundle nextMiddleware;
 
 
     @Override
-    public JaddeApplicationMiddleware setNext(JaddeApplicationMiddleware middleware) {
+    public JaddeApplicationBundle setNext(JaddeApplicationBundle middleware) {
         this.nextMiddleware = middleware;
         return middleware;
     }
