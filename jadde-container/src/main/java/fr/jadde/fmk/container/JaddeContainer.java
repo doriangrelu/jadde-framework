@@ -153,14 +153,7 @@ public class JaddeContainer {
     public <T> Optional<T> resolve(final Class<T> targetClassName, final String qualifier) {
         final List<T> matchInstances = this.resolveAll(targetClassName);
         if (matchInstances.size() > 1) {
-            if (null == qualifier) {
-                throw new NotSingleBeanException("Multiples beans for class name '" + targetClassName + "'; Use qualifier");
-            }
-            try {
-                return this.resolveConflict(targetClassName, matchInstances, qualifier);
-            } catch (Throwable e) {
-                return Optional.empty();
-            }
+            return this.resolveConflict(targetClassName, matchInstances, qualifier);
         }
         return Optional.ofNullable(matchInstances.get(0));
     }
@@ -169,17 +162,11 @@ public class JaddeContainer {
         final List<T> defaultElements = conflictInstances.stream()
                 .filter(targetClass -> targetClass.getClass().isAnnotationPresent(Default.class))
                 .toList();
-        if (defaultElements.size() > 0) {
-            if (defaultElements.size() > 1) {
-                throw new NotSingleBeanException("Multiples beans for class name '" + targetClassName + "' annoted with Default annotation");
-            }
-            return Optional.ofNullable(defaultElements.get(0));
-        }
 
         final List<T> qualifiedElements = conflictInstances.stream()
                 .filter(targetClass -> targetClass.getClass().isAnnotationPresent(Qualifier.class))
                 .filter(targetClass -> {
-                    Qualifier[] qualifiers = targetClassName.getAnnotationsByType(Qualifier.class);
+                    Qualifier[] qualifiers = targetClass.getClass().getAnnotationsByType(Qualifier.class);
                     return qualifiers.length > 0 && qualifiers[0].value().equals(qualifier);
                 })
                 .toList();
@@ -189,7 +176,15 @@ public class JaddeContainer {
             }
             return Optional.ofNullable(qualifiedElements.get(0));
         }
-        return Optional.empty();
+
+        if (defaultElements.size() > 0) {
+            if (defaultElements.size() > 1) {
+                throw new NotSingleBeanException("Multiples beans for class name '" + targetClassName + "' annoted with Default annotation");
+            }
+            return Optional.ofNullable(defaultElements.get(0));
+        }
+
+        throw new NotSingleBeanException("Multiples beans for class name '" + targetClassName + "'; Use Default or Qualifier");
     }
 
     /**

@@ -1,10 +1,8 @@
 package fr.jadde.test.fmk.container;
 
 import fr.jadde.fmk.container.JaddeContainer;
-import fr.jadde.test.fmk.container.mock.A;
-import fr.jadde.test.fmk.container.mock.B;
-import fr.jadde.test.fmk.container.mock.C;
-import fr.jadde.test.fmk.container.mock.I;
+import fr.jadde.fmk.container.exception.NotSingleBeanException;
+import fr.jadde.test.fmk.container.mock.*;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -36,12 +34,20 @@ class JaddeContainerTest {
                 .isNotEmpty()
                 .containsInstanceOf(C.class);
 
-        container.resolve(I.class);
+        Assertions.assertThat(container.resolve(I.class))
+                .isNotNull()
+                .isNotEmpty()
+                .containsInstanceOf(B.class);
 
+        Assertions.assertThat(container.resolve(I.class, "this"))
+                .isNotNull()
+                .isNotEmpty()
+                .containsInstanceOf(C.class);
 
-//        final Optional<MyApplictionScopedService> instance = container.resolve(MyApplictionScopedService.class);
-//        Assertions.assertThat(instance).isNotEmpty().containsInstanceOf(MyApplictionScopedService.class);
-//        Assertions.assertThat(instance.get().getClass().isAnnotationPresent(MyAnnotation.class)).isTrue();
+        container.registerInstance(Conflict1.class);
+        container.registerInstance(Conflict2.class);
+
+        Assertions.assertThatThrownBy(() -> container.resolve(II.class)).isInstanceOf(NotSingleBeanException.class);
 
     }
 
