@@ -1,19 +1,20 @@
 package fr.jadde.fmk.container;
 
-import fr.jadde.fmk.container.annotation.JaddeModule;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
-import jakarta.enterprise.context.spi.CreationalContext;
-import jakarta.enterprise.inject.spi.Bean;
-import org.jboss.weld.bean.ManagedBean;
-import org.jboss.weld.bootstrap.spi.BeanDiscoveryMode;
-import org.jboss.weld.environment.se.Weld;
-import org.jboss.weld.environment.se.WeldContainer;
-import org.jboss.weld.exceptions.UnsatisfiedResolutionException;
+import fr.jadde.fmk.container.annotation.Default;
+import fr.jadde.fmk.container.annotation.Qualifier;
+import fr.jadde.fmk.container.exception.MissingEmptyConstructorException;
+import fr.jadde.fmk.container.exception.NotSingleBeanException;
+
 
 import java.lang.annotation.Annotation;
-import java.util.List;
-import java.util.Optional;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.stream.Stream;
 
 /**
  * Allows you to provide a dependency injector container
@@ -23,29 +24,72 @@ import java.util.Optional;
  */
 public class JaddeContainer {
 
-    private static final Logger logger = LoggerFactory.getLogger(JaddeContainer.class);
+    private final Map<Class<?>, List<Object>> instances;
 
-    private final WeldContainer container;
+    private final Lock reentrantLock;
 
     /**
      * Ctor.
-     *
-     * @param container the Weld container instance
      */
-    private JaddeContainer(WeldContainer container) {
-        this.container = container;
+    public JaddeContainer() {
+        this.instances = new ConcurrentHashMap<>();
+        this.reentrantLock = new ReentrantLock();
     }
 
     /**
-     * Resolves bean from annotation
+     * Creates and return created instance
      *
-     * @param annotations target annotations array
-     * @param <T>         expected generic bean type
-     * @return the target bean if exists or null
+     * @param targetClass target class name
+     * @param <T>         expected generic type
+     * @return expected instance
      */
+    public <T> T getInstance(final Class<T> targetClass) {
+        try {
+            this.reentrantLock.lock();
+            final T instance = this.createInstance(targetClass);
+            this.instances.computeIfAbsent(targetClass, clazz -> Collections.synchronizedList(new ArrayList<>())).add(instance);
+            return instance;
+        } finally {
+            this.reentrantLock.unlock();
+        }
+    }
+
+    /**
+     * Registers new instance in container (the class must have an empty constructor)
+     *
+     * @param targetClass target class
+     * @param <T>         target expected generic type
+     */
+    public <T> void registerInstance(final Class<T> targetClass) {
+        try {
+            this.reentrantLock.lock();
+            final T instance = this.createInstance(targetClass);
+            this.instances.computeIfAbsent(targetClass, clazz -> Collections.synchronizedList(new ArrayList<>())).add(instance);
+        } finally {
+            this.reentrantLock.unlock();
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    public <T> T resolve(final Annotation... annotations) {
-        return (T) this.container.select(annotations).get();
+    private <T> T createInstance(final Class<T> targetClass) {
+        final MissingEmptyConstructorException missingEmptyConstructorException = new MissingEmptyConstructorException("Missing an empty constructor for bean '" + targetClass + "'");
+        try {
+            final Constructor<T>[] constructors = (Constructor<T>[]) targetClass.getConstructors();
+            return Arrays.stream(constructors)
+                    .filter(constructor -> constructor.getParameterCount() == 0)
+                    .filter(AccessibleObject::trySetAccessible)
+                    .findFirst()
+                    .map(constructor -> {
+                        try {
+                            return constructor.newInstance();
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                            throw new IllegalStateException("Unexpected instantiation error '" + targetClass + "'");
+                        }
+                    })
+                    .orElseThrow(() -> missingEmptyConstructorException);
+        } catch (ClassCastException exception) {
+            throw missingEmptyConstructorException;
+        }
     }
 
     /**
@@ -55,38 +99,12 @@ public class JaddeContainer {
      * @param <T>         expected generic bean type
      * @return optional target bean
      */
-    public <T> Optional<T> tryResolve(final Annotation... annotations) {
-        return Optional.ofNullable(this.resolve(annotations));
-    }
-
-    /**
-     * Resolves bean from annotation and class name
-     *
-     * @param className   expected class name
-     * @param annotations target annotations array
-     * @param <T>         expected generic bean type
-     * @return the target bean if exists or null
-     */
     @SuppressWarnings("unchecked")
-    public <T> T resolve(final Class<?> className, final Annotation... annotations) {
-        try {
-            return (T) this.container.select(className, annotations).get();
-        } catch (UnsatisfiedResolutionException e) {
-            logger.warn("Cannot resolve bean '" + className + "'", e);
-            return null;
-        }
-    }
-
-    /**
-     * Resolves bean from annotation and class name
-     *
-     * @param className   target class name
-     * @param annotations target annotations array
-     * @param <T>         expected generic bean type
-     * @return optional bean
-     */
-    public <T> Optional<T> tryResolve(final Class<?> className, final Annotation... annotations) {
-        return Optional.ofNullable(this.resolve(className, annotations));
+    public <T> Optional<T> tryResolve(final Annotation... annotations) {
+        return (Optional<T>) this.instances.values()
+                .stream()
+                .filter(o -> Stream.of(annotations).allMatch(a -> o.getClass().isAnnotationPresent(a.getClass())))
+                .findFirst();
     }
 
     /**
@@ -96,8 +114,82 @@ public class JaddeContainer {
      * @param <T>             expected generic beans type
      * @return the list that contains all beans
      */
+    @SuppressWarnings("unchecked")
     public <T> List<T> resolveAll(final Class<T> targetClassName) {
-        return this.container.select(targetClassName).stream().toList();
+        try {
+            final List<T> result = new ArrayList<>();
+            this.instances.forEach((aClass, objects) -> {
+                if (targetClassName.isAssignableFrom(aClass)) {
+                    result.addAll((Collection<? extends T>) objects);
+                }
+            });
+            return Collections.unmodifiableList(result);
+        } catch (ClassCastException e) {
+            return Collections.emptyList();
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public <T> List<T> resolveAll() {
+        return (List<T>) this.instances.values()
+                .stream()
+                .flatMap(Collection::stream)
+                .toList();
+    }
+
+    /**
+     * Provides real instance resolving
+     * The Jadde container return by default a proxy object
+     * This method bypass the proxy object
+     * In most cases you must use the proxy object
+     *
+     * @param targetClassName target class name
+     * @param qualifier       target qualifier
+     * @param <T>             expected generic beans type
+     * @return optional real instance
+     */
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> resolve(final Class<T> targetClassName, final String qualifier) {
+        final List<T> matchInstances = this.resolveAll(targetClassName);
+        if (matchInstances.size() > 1) {
+            if (null == qualifier) {
+                throw new NotSingleBeanException("Multiples beans for class name '" + targetClassName + "'; Use qualifier");
+            }
+            try {
+                return this.resolveConflict(targetClassName, matchInstances, qualifier);
+            } catch (Throwable e) {
+                return Optional.empty();
+            }
+        }
+        return Optional.ofNullable(matchInstances.get(0));
+    }
+
+    private <T> Optional<T> resolveConflict(final Class<T> targetClassName, final List<T> conflictInstances, final String qualifier) {
+        final List<T> defaultElements = conflictInstances.stream()
+                .filter(targetClass -> targetClass.getClass().isAnnotationPresent(Default.class))
+                .toList();
+        if (defaultElements.size() > 0) {
+            if (defaultElements.size() > 1) {
+                throw new NotSingleBeanException("Multiples beans for class name '" + targetClassName + "' annoted with Default annotation");
+            }
+            return Optional.ofNullable(defaultElements.get(0));
+        }
+
+        final List<T> qualifiedElements = conflictInstances.stream()
+                .filter(targetClass -> targetClass.getClass().isAnnotationPresent(Qualifier.class))
+                .filter(targetClass -> {
+                    Qualifier[] qualifiers = targetClassName.getAnnotationsByType(Qualifier.class);
+                    return qualifiers.length > 0 && qualifiers[0].value().equals(qualifier);
+                })
+                .toList();
+        if (qualifiedElements.size() > 0) {
+            if (qualifiedElements.size() > 1) {
+                throw new NotSingleBeanException("Multiples beans for class name '" + targetClassName + "' annoted with Qualifier('" + qualifier + "') annotation");
+            }
+            return Optional.ofNullable(qualifiedElements.get(0));
+        }
+        return Optional.empty();
     }
 
     /**
@@ -110,45 +202,8 @@ public class JaddeContainer {
      * @param <T>             expected generic beans type
      * @return optional real instance
      */
-    @SuppressWarnings("unchecked")
-    public <T> Optional<T> resolveRealInstance(final Class<?> targetClassName) {
-        final CreationalContext<T> ctx = this.container.getBeanManager().createCreationalContext(null);
-        final List<Bean<?>> types = this.container.getBeanManager().getBeans(targetClassName).stream().toList();
-
-        if (types.isEmpty()) {
-            return Optional.empty();
-        }
-        final Bean<T> bean = (Bean<T>) types.get(0);
-
-        return Optional.ofNullable(this.container.getBeanManager().getContext(bean.getScope()).get(bean, ctx));
-    }
-
-    /**
-     * Resolves all managed beans
-     *
-     * @return the managed beans list
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public List<ManagedBean> resolveAllBeans() {
-        return this.container.getBeanManager().getBeans(Object.class)
-                .stream()
-                .filter(ManagedBean.class::isInstance)
-                .map(ManagedBean.class::cast)
-                .filter(bean -> !bean.getBeanClass().isAnnotationPresent(JaddeModule.class))
-                .toList();
-    }
-
-    /**
-     * Jadde container creator !
-     *
-     * @return the Jadde container himself !
-     */
-    public static JaddeContainer create() {
-        final Weld weld = new Weld()
-                .enableDiscovery()
-                .setBeanDiscoveryMode(BeanDiscoveryMode.ANNOTATED)
-                .scanClasspathEntries();
-        return new JaddeContainer(weld.initialize());
+    public <T> Optional<T> resolve(final Class<T> targetClassName) {
+        return this.resolve(targetClassName, null);
     }
 
 }

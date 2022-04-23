@@ -1,12 +1,12 @@
 package fr.jadde.fmk.app.context;
 
+import fr.jadde.fmk.app.JaddeApplication;
+import fr.jadde.fmk.app.assembly.resolver.ClasspathResolver;
 import fr.jadde.fmk.app.exception.ImmutableContextViolationException;
 import fr.jadde.fmk.container.JaddeContainer;
-import fr.jadde.fmk.app.JaddeApplication;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import jakarta.enterprise.context.ApplicationScoped;
 
 import java.util.Collections;
 import java.util.Map;
@@ -24,13 +24,14 @@ import java.util.stream.Stream;
  * @author Dorian GRELU
  * @version Avril. 2022
  */
-@ApplicationScoped
 public class JaddeApplicationContext {
 
     private static final Logger logger = LoggerFactory.getLogger(JaddeApplicationContext.class);
 
     public static final Pattern ARGUMENT_PATTERN = Pattern
             .compile("^([a-z]+([a-z\\-\\.][a-z]+)*)=([a-z0-9]+([a-z\\-\\.][a-z0-9]+)*)$");
+
+    private ClasspathResolver classpathResolver;
 
     private Class<?> applicationClassName;
 
@@ -98,6 +99,15 @@ public class JaddeApplicationContext {
      */
     public Map<String, String> arguments() {
         return Collections.unmodifiableMap(this.arguments);
+    }
+
+    public JaddeApplicationContext withClasspathResolver(final ClasspathResolver resolver) {
+        this.classpathResolver = resolver;
+        return this;
+    }
+
+    public ClasspathResolver classpathResolver() {
+        return classpathResolver;
     }
 
     /**

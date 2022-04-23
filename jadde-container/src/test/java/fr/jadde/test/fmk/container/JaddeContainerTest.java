@@ -1,54 +1,47 @@
 package fr.jadde.test.fmk.container;
 
 import fr.jadde.fmk.container.JaddeContainer;
-import fr.jadde.test.fmk.container.mock.MyAnnotation;
-import fr.jadde.test.fmk.container.mock.MyApplictionScopedService;
-import fr.jadde.test.fmk.container.mock.NotABean;
-import fr.jadde.test.fmk.container.mock.StatelessBean;
+import fr.jadde.test.fmk.container.mock.A;
+import fr.jadde.test.fmk.container.mock.B;
+import fr.jadde.test.fmk.container.mock.C;
+import fr.jadde.test.fmk.container.mock.I;
 import org.assertj.core.api.Assertions;
-import org.jboss.weld.bean.ManagedBean;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Optional;
 
 /**
  * @author Dorian GRELU
  */
 class JaddeContainerTest {
 
-    private static JaddeContainer container;
-
-    @BeforeAll
-    public static void setUp() {
-        container = JaddeContainer.create();
-    }
-
-    @Test
-    @SuppressWarnings("rawtypes")
-    void shouldResolvesAllBeans() {
-        final List<ManagedBean> managedBeans = container.resolveAllBeans();
-        Assertions.assertThat(managedBeans).isNotEmpty();
-        Assertions.assertThat(managedBeans.stream().map(ManagedBean::getBeanClass).toList())
-                .contains(StatelessBean.class, MyApplictionScopedService.class)
-                .doesNotContain(NotABean.class);
-    }
-
 
     @Test
     void shouldResolvesSingleBean() {
-        Assertions.assertThat(container.tryResolve(MyApplictionScopedService.class)).isNotEmpty();
-        Assertions.assertThat(container.tryResolve(StatelessBean.class)).isNotEmpty();
-        Assertions.assertThat(container.tryResolve(NotABean.class)).isEmpty();
+        final JaddeContainer container = new JaddeContainer();
 
-        Assertions.assertThat(container.<Object>resolve(MyApplictionScopedService.class)).isNotNull();
-        Assertions.assertThat(container.<Object>resolve(StatelessBean.class)).isNotNull();
-        Assertions.assertThat(container.<Object>resolve(NotABean.class)).isNull();
+        Assertions.assertThat(container.getInstance(A.class))
+                .isNotNull()
+                .isInstanceOf(A.class);
 
-        final Optional<MyApplictionScopedService> instance = container.resolveRealInstance(MyApplictionScopedService.class);
-        Assertions.assertThat(instance).isNotEmpty().containsInstanceOf(MyApplictionScopedService.class);
-        Assertions.assertThat(instance.get().getClass().isAnnotationPresent(MyAnnotation.class)).isTrue();
+        Assertions.assertThat(container.resolve(A.class))
+                .isNotEmpty()
+                .containsInstanceOf(A.class);
+
+        container.registerInstance(B.class);
+        container.registerInstance(C.class);
+
+        Assertions.assertThat(container.resolve(B.class))
+                .isNotEmpty()
+                .containsInstanceOf(B.class);
+        Assertions.assertThat(container.resolve(C.class))
+                .isNotEmpty()
+                .containsInstanceOf(C.class);
+
+        container.resolve(I.class);
+
+
+//        final Optional<MyApplictionScopedService> instance = container.resolve(MyApplictionScopedService.class);
+//        Assertions.assertThat(instance).isNotEmpty().containsInstanceOf(MyApplictionScopedService.class);
+//        Assertions.assertThat(instance.get().getClass().isAnnotationPresent(MyAnnotation.class)).isTrue();
 
     }
 

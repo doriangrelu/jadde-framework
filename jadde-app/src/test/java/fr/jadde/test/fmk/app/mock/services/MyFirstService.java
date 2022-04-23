@@ -1,20 +1,16 @@
 package fr.jadde.test.fmk.app.mock.services;
 
+import fr.jadde.fmk.container.annotation.JaddeBean;
 import fr.jadde.test.fmk.app.mock.annotation.MyAnnot;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 
 /**
  * @author Dorian GRELU
  */
-@ApplicationScoped
 @MyAnnot
+@JaddeBean
 public class MyFirstService  {
 
     private static String containerIdentifier;
-
-    @Inject
-    private MyServiceInterface myServiceInterface;
 
     public static String containerIdentifier() {
         return containerIdentifier;

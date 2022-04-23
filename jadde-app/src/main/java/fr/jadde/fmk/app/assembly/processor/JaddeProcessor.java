@@ -1,16 +1,15 @@
 package fr.jadde.fmk.app.assembly.processor;
 
-import fr.jadde.fmk.app.assembly.processor.api.AbstractJaddeAnnotationProcessor;
 import fr.jadde.fmk.app.assembly.processor.api.JaddeAnnotationProcessor;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
 import fr.jadde.fmk.app.middleware.api.JaddeApplicationMiddleware;
 import fr.jadde.fmk.app.tools.BeanUtils;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
-import org.jboss.weld.bean.ManagedBean;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Allows you to process a bean
@@ -22,15 +21,15 @@ public class JaddeProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(JaddeProcessor.class);
 
-    private final List<JaddeAnnotationProcessor> processors;
+    private final Set<JaddeAnnotationProcessor> processors;
 
     /**
      * Ctor.
      *
      * @param processors available Jadde bean processors
      */
-    private JaddeProcessor(final List<JaddeAnnotationProcessor> processors) {
-        this.processors = Collections.unmodifiableList(processors);
+    private JaddeProcessor(final Set<JaddeAnnotationProcessor> processors) {
+        this.processors = Collections.unmodifiableSet(processors);
     }
 
     /**
@@ -41,14 +40,14 @@ public class JaddeProcessor {
     @SuppressWarnings("rawtypes")
     public void process(final JaddeApplicationContext context) {
         BeanUtils.getSafeBeans(context, JaddeApplicationMiddleware.class).forEach(bean -> {
-            context.container().resolveRealInstance(bean.getBeanClass()).ifPresentOrElse(o -> {
-                logger.info("Start process '" + bean.getBeanClass() + "' processing");
+            context.container().resolve(bean.getClass()).ifPresentOrElse(o -> {
+                logger.info("Start process '" + bean.getClass() + "' processing");
                 this.processInstance(o, processors);
-            }, () -> logger.warn("Cannot process bean '" + bean.getBeanClass() + "' because missing in Jadde container"));
+            }, () -> logger.warn("Cannot process bean '" + bean.getClass() + "' because missing in Jadde container"));
         });
     }
 
-    private void processInstance(final Object bean, final List<JaddeAnnotationProcessor> processors) {
+    private void processInstance(final Object bean, final Set<JaddeAnnotationProcessor> processors) {
         processors.parallelStream()
                 .filter(processor -> processor.doesSupport(bean))
                 .forEach(processor -> processor.process(bean));
@@ -60,7 +59,7 @@ public class JaddeProcessor {
      * @param processors target available processors
      * @return the Jadde Processor ! 😍
      */
-    public static JaddeProcessor create(final List<JaddeAnnotationProcessor> processors) {
+    public static JaddeProcessor create(final Set<JaddeAnnotationProcessor> processors) {
         return new JaddeProcessor(processors);
     }
 

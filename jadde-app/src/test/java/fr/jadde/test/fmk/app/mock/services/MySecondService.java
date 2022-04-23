@@ -1,11 +1,11 @@
 package fr.jadde.test.fmk.app.mock.services;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import fr.jadde.fmk.container.annotation.JaddeBean;
 
 /**
  * @author Dorian GRELU
  */
-@ApplicationScoped
+@JaddeBean
 public class MySecondService implements MyServiceInterface {
 
 
