@@ -13,12 +13,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>fr.jadde</groupId>
-            <artifactId>jadde-app</artifactId>
-            <version>${project.version}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
             <scope>provided</scope>
@@ -30,6 +24,13 @@
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>fr.jadde</groupId>
+            <artifactId>jadde-app</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>fr.jadde</groupId>

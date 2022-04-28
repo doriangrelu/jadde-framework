@@ -21,6 +21,13 @@
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Tests dependencies. Assumes that the scope is 'provided' (and not test) because we need to provide a tests Helpers class which have external test dependencies -->
+        <dependency>
+            <groupId>io.vertx</groupId>
             <artifactId>vertx-junit5</artifactId>
             <version>${vertx.version}</version>
             <scope>provided</scope>
@@ -41,12 +48,6 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
             <version>${junit-jupiter.version}</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-core</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
