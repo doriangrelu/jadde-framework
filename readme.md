@@ -13,7 +13,7 @@ For the moment the project is still under development, feel free to contribute. 
 # Usage
 
 Jadde Framework is as mentioned above based on VertX. The mechanics are very simple. You just have to get the Maven
-dependency (en.jadde:jadde-app:x.x.x-RELEASE).
+dependency (fr.jadde:jadde-app:x.x.x-RELEASE).
 
 Getting this dependency will allow you to do two things:
 
