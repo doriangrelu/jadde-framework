@@ -1,9 +1,8 @@
 package fr.jadde.fmk.app;
 
 import fr.jadde.fmk.app.assembly.JaddeApplicationAssembly;
-import fr.jadde.fmk.app.assembly.resolver.ClasspathResolver;
+import fr.jadde.fmk.app.context.tools.ClasspathResolver;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
-import fr.jadde.fmk.app.exception.CannotStartApplicationException;
 import fr.jadde.fmk.container.JaddeContainer;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
@@ -22,12 +21,12 @@ public class JaddeApplication {
 
     private static final Logger logger = LoggerFactory.getLogger(JaddeApplication.class);
 
-    public static void start(final Class<? extends JaddeApplication> targetApplication, final String[] arguments) {
+    public static JaddeApplicationContext start(final Class<? extends JaddeApplication> targetApplication, final String[] arguments, final Vertx vertx) {
         logger.info("Try setup to context");
         final JaddeApplicationContext context = new JaddeApplicationContext()
                 .withApplicationClassName(targetApplication)
                 .withContainer(new JaddeContainer())
-                .withVertX(Vertx.vertx())
+                .withVertX(vertx)
                 .withClasspathResolver(ClasspathResolver.create())
                 .withArguments(arguments);
 
@@ -36,6 +35,12 @@ public class JaddeApplication {
         assembly.processAssembly(context);
 
         logger.info("Successfully assembled Jadde application");
+
+        return context;
+    }
+
+    public static JaddeApplicationContext start(final Class<? extends JaddeApplication> targetApplication, final String[] arguments) {
+        return start(targetApplication, arguments, Vertx.vertx());
     }
 
 }

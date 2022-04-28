@@ -1,6 +1,6 @@
 package fr.jadde.test.fmk.app.mock.processor;
 
-import fr.jadde.fmk.app.assembly.processor.api.AbstractJaddeBeanProcessor;
+import fr.jadde.fmk.app.executor.bean.api.AbstractJaddeBeanProcessor;
 import fr.jadde.test.fmk.app.mock.annotation.MyAnnot;
 import fr.jadde.test.fmk.app.mock.services.MyFirstService;
 

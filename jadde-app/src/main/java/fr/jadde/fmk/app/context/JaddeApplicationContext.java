@@ -1,7 +1,7 @@
 package fr.jadde.fmk.app.context;
 
 import fr.jadde.fmk.app.JaddeApplication;
-import fr.jadde.fmk.app.assembly.resolver.ClasspathResolver;
+import fr.jadde.fmk.app.context.tools.ClasspathResolver;
 import fr.jadde.fmk.app.context.configuration.Configuration;
 import fr.jadde.fmk.app.exception.ImmutableContextViolationException;
 import fr.jadde.fmk.app.verticle.AbstractJaddeVerticle;
@@ -33,9 +33,10 @@ import java.util.stream.Stream;
  */
 public class JaddeApplicationContext {
 
-    public static final Pattern ARGUMENT_PATTERN = Pattern
-            .compile("^([a-z]+([a-z\\-\\.][a-z]+)*)=([a-z0-9]+([a-z\\-\\.][a-z0-9]+)*)$");
+    public static final Pattern ARGUMENT_PATTERN = Pattern.compile("^([a-z]+([a-z\\-\\.][a-z]+)*)=([a-z0-9]+([a-z\\-\\.][a-z0-9]+)*)$");
+
     private static final Logger logger = LoggerFactory.getLogger(JaddeApplicationContext.class);
+
     private ClasspathResolver classpathResolver;
 
     private Class<?> applicationClassName;

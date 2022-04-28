@@ -1,9 +1,9 @@
 package fr.jadde.fmk.bundle.web.verticle;
 
+import fr.jadde.fmk.app.context.configuration.Parameter;
 import fr.jadde.fmk.app.verticle.AbstractJaddeVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.ext.web.Router;
@@ -15,34 +15,30 @@ public class JaddeApplicationServerVerticle extends AbstractJaddeVerticle {
 
     public void start(Promise<Void> startPromise) {
         Router router = Router.router(vertx);
-
         final HttpServer server = vertx.createHttpServer().requestHandler(router);
 
-        this.context().configuration().freeServerPort().onSuccess(port -> {
-            server.listen(port, res -> {
+        this.context().configuration().serverConfiguration().onSuccess(serverConfiguration -> {
+            server.listen(serverConfiguration.getInteger("port"), serverConfiguration.getString("host"), res -> {
                 if (res.succeeded()) {
-                    logger.info("Successfully starter HTTP Web server on local port '" + port + "'");
+                    logger.info("Successfully starter HTTP Web server  '" + serverConfiguration.getString("host") + ':' + serverConfiguration.getInteger("port") + "'");
+                    this.context().withParameter("server.configuration", serverConfiguration);
                     startPromise.complete();
                 } else {
-                    logger.info("Cannot start HTTP Web server on local port '" + port + "'", res.cause());
+                    logger.info("Cannot start HTTP Web server on local port '" + serverConfiguration.getInteger("port") + "'", res.cause());
                     startPromise.fail(res.cause());
                 }
             });
             this.context()
-                    .withParameter("server", server)
-                    .withParameter("router", router)
-                    .withParameter("port", port);
+                    .withParameter(Parameter.SERVER.parameterName(), server)
+                    .withParameter(Parameter.ROUTER.parameterName(), router)
+                    .withParameter(Parameter.PORT.parameterName(), serverConfiguration.getInteger("port"))
+                    .withParameter(Parameter.HOST.parameterName(), serverConfiguration.getString("host"));
 
-            router.route().handler(ctx -> {
-                final HttpServerResponse response = ctx.response();
-                response.putHeader("content-type", "text/plain");
-                response.end("Welcome to Jadde application");
-            });
         }).onFailure(startPromise::fail);
     }
 
     @Override
-    public void stop(Promise<Void> stopPromise) throws Exception {
+    public void stop(Promise<Void> stopPromise) {
         logger.info("Requested stop HTTP Web Jadde Verticle");
         this.context().<HttpServer>waitForParameter("server").compose(HttpServer::close)
                 .onComplete(dummy -> {

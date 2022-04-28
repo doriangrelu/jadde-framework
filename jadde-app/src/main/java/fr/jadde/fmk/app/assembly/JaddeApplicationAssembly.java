@@ -1,10 +1,9 @@
 package fr.jadde.fmk.app.assembly;
 
-import fr.jadde.fmk.app.assembly.processor.JaddeProcessor;
-import fr.jadde.fmk.app.assembly.processor.api.JaddeBeanProcessor;
+import fr.jadde.fmk.app.executor.bean.JaddeBeanExecutor;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
-import fr.jadde.fmk.app.bundle.JaddeApplicationDelegate;
-import fr.jadde.fmk.app.bundle.api.JaddeApplicationBundle;
+import fr.jadde.fmk.app.executor.bundle.JaddeBundleExecutor;
+import fr.jadde.fmk.app.executor.bundle.api.JaddeBundle;
 import fr.jadde.fmk.container.annotation.JaddeBean;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -28,16 +27,19 @@ public class JaddeApplicationAssembly {
         if (null == context) {
             throw new IllegalStateException("Cannot start assembly, missing context");
         }
-
+        
         logger.info("Resolves beans processors");
-        final Set<JaddeBeanProcessor> processors = context.classpathResolver().resolveBySubtype(JaddeBeanProcessor.class)
+        final Set<fr.jadde.fmk.app.executor.bean.api.JaddeBeanProcessor> processors = context.classpathResolver().resolveBySubtype(fr.jadde.fmk.app.executor.bean.api.JaddeBeanProcessor.class)
                 .parallelStream()
                 .map(context.container()::getInstance)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
 
-        logger.info("Resolves middlewares");
-        context.classpathResolver().resolveBySubtype(JaddeApplicationBundle.class)
+        logger.info("Define context for beans processors");
+        processors.forEach(jaddeBeanProcessor -> jaddeBeanProcessor.setContext(context));
+
+        logger.info("Resolves bundles");
+        context.classpathResolver().resolveBySubtype(JaddeBundle.class)
                 .parallelStream()
                 .forEach(context.container()::registerInstance);
 
@@ -49,9 +51,10 @@ public class JaddeApplicationAssembly {
         logger.info("'" + processors.size() + "' founded, start application processing");
         logger.debug("Processor list -> " + Json.encode(processors.stream().map(Object::toString).toList()));
 
-        JaddeApplicationDelegate.create().startDequeue(context);
+        JaddeBundleExecutor.create().execute(context);
         context.finalise();
-        JaddeProcessor.create(processors).process(context);
+
+        JaddeBeanExecutor.create(processors).execute(context);
 
     }
 

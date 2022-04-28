@@ -15,6 +15,7 @@
 
     <modules>
         <module>jadde-web-bundle</module>
+        <module>jadde-security-bundle</module>
     </modules>
 
 </project>

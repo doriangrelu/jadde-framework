@@ -149,7 +149,6 @@ public class JaddeContainer {
      * @param <T>             expected generic beans type
      * @return optional real instance
      */
-    @SuppressWarnings("unchecked")
     public <T> Optional<T> resolve(final Class<T> targetClassName, final String qualifier) {
         final List<T> matchInstances = this.resolveAll(targetClassName);
         if (matchInstances.size() > 1) {
