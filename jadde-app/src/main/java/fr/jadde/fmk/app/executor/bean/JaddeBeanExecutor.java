@@ -1,6 +1,7 @@
 package fr.jadde.fmk.app.executor.bean;
 
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import fr.jadde.fmk.app.executor.bean.api.BeanWithContext;
 import fr.jadde.fmk.app.executor.bundle.api.JaddeBundle;
 import fr.jadde.fmk.app.executor.bean.tools.BeanUtils;
 import io.vertx.core.impl.logging.Logger;
@@ -37,11 +38,18 @@ public class JaddeBeanExecutor {
      */
     public void execute(final JaddeApplicationContext context) {
         BeanUtils.getSafeBeans(context, JaddeBundle.class).forEach(bean -> {
+            this.handleContext(bean, context);
             context.container().resolve(bean.getClass()).ifPresentOrElse(o -> {
                 logger.info("Start process '" + bean.getClass() + "' processing");
                 this.processInstance(o, processors);
             }, () -> logger.warn("Cannot process bean '" + bean.getClass() + "' because missing in Jadde container"));
         });
+    }
+
+    private void handleContext(final Object bean, final JaddeApplicationContext context) {
+        if (bean instanceof BeanWithContext beanWithContext) {
+            beanWithContext.setContext(context);
+        }
     }
 
     private void processInstance(final Object bean, final Set<fr.jadde.fmk.app.executor.bean.api.JaddeBeanProcessor> processors) {
