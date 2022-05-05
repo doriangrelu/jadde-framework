@@ -25,7 +25,6 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-auth-oauth2</artifactId>
         </dependency>
-
         <dependency>
             <groupId>fr.jadde</groupId>
             <artifactId>jadde-app</artifactId>
@@ -43,6 +42,12 @@
             <artifactId>jadde-tests</artifactId>
             <version>${project.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.tngtech.keycloakmock</groupId>
+            <artifactId>mock</artifactId>
+            <scope>test</scope>
+            <version>0.11.0</version>
         </dependency>
     </dependencies>
 

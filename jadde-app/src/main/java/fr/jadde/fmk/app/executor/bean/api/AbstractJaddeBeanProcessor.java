@@ -31,4 +31,10 @@ public abstract class AbstractJaddeBeanProcessor implements JaddeBeanProcessor {
     public String toString() {
         return this.getClass().getName();
     }
+
+    @Override
+    public int priorityOrder() {
+        return 99;
+    }
+
 }

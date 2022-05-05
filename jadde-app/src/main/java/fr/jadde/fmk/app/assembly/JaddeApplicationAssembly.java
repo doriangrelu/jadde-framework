@@ -2,6 +2,7 @@ package fr.jadde.fmk.app.assembly;
 
 import fr.jadde.fmk.app.executor.bean.JaddeBeanExecutor;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import fr.jadde.fmk.app.executor.bean.api.JaddeBeanProcessor;
 import fr.jadde.fmk.app.executor.bundle.JaddeBundleExecutor;
 import fr.jadde.fmk.app.executor.bundle.api.JaddeBundle;
 import fr.jadde.fmk.container.annotation.JaddeBean;
@@ -9,6 +10,8 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,17 +26,18 @@ public class JaddeApplicationAssembly {
 
     private static final Logger logger = LoggerFactory.getLogger(JaddeApplicationAssembly.class);
 
+    @SuppressWarnings("unchecked")
     public void processAssembly(final JaddeApplicationContext context) {
         if (null == context) {
             throw new IllegalStateException("Cannot start assembly, missing context");
         }
-        
+
         logger.info("Resolves beans processors");
-        final Set<fr.jadde.fmk.app.executor.bean.api.JaddeBeanProcessor> processors = context.classpathResolver().resolveBySubtype(fr.jadde.fmk.app.executor.bean.api.JaddeBeanProcessor.class)
+        final List<JaddeBeanProcessor> processors = (List<JaddeBeanProcessor>) context.classpathResolver().resolveBySubtype(JaddeBeanProcessor.class)
                 .parallelStream()
                 .map(context.container()::getInstance)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toSet());
+                .toList();
 
         logger.info("Define context for beans processors");
         processors.forEach(jaddeBeanProcessor -> jaddeBeanProcessor.setContext(context));

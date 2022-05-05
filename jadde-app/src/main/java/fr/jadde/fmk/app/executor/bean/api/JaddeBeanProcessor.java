@@ -1,6 +1,8 @@
 package fr.jadde.fmk.app.executor.bean.api;
 
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import io.vertx.core.Future;
+import io.vertx.core.Promise;
 
 /**
  * Allows to define a bean processor
@@ -23,6 +25,16 @@ public interface JaddeBeanProcessor {
      *
      * @param target target bean
      */
+    default void process(final Object target, final Promise<Void> processPromise) {
+        this.process(target);
+        processPromise.tryComplete();
+    }
+
+    /**
+     * Should process the target bean
+     *
+     * @param target target bean
+     */
     void process(final Object target);
 
     /**
@@ -32,5 +44,9 @@ public interface JaddeBeanProcessor {
      * @return does support bean processing
      */
     boolean doesSupport(final Object target);
+
+
+    int priorityOrder();
+
 
 }
