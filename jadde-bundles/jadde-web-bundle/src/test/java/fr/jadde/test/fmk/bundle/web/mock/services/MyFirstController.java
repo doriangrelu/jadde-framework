@@ -2,6 +2,7 @@ package fr.jadde.test.fmk.bundle.web.mock.services;
 
 import fr.jadde.fmk.bundle.web.annotation.BodyParam;
 import fr.jadde.fmk.bundle.web.annotation.RestController;
+import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 
 import javax.ws.rs.*;
@@ -23,8 +24,8 @@ public class MyFirstController {
     @Path("/hello/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    public JsonObject hello(final @PathParam("name") String name) {
-        return new JsonObject().put("text", "hello " + name);
+    public Future<JsonObject> hello(final @PathParam("name") String name) {
+        return Future.succeededFuture(new JsonObject().put("text", "hello " + name));
     }
 
 }

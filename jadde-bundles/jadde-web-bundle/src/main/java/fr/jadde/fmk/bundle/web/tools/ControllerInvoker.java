@@ -15,14 +15,17 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Stream;
 
 public class ControllerInvoker {
 
     private static final Logger logger = LoggerFactory.getLogger(ControllerInvoker.class);
 
+    @SuppressWarnings("unchecked")
     public static Future<Object> doInvoke(final RoutingContext context, final Object delegate, final Method method) {
-        logger.info("Request {}[{}] --> {}[{}]", context.request().method(), context.normalizedPath(), delegate.getClass().getName(), method.getName());
+        logger.info("[http-{}] DISPATCH --> {}[{}]", context.request().headers().get("uuid"), delegate.getClass().getName(), method.getName());
         final List<Object> parameters = Stream.of(method.getParameters())
                 .map(parameter -> mapRoutingContext(context, parameter))
                 .map(parameter -> mapPathParameters(context, parameter))
@@ -32,13 +35,17 @@ public class ControllerInvoker {
                 .map(parameter -> mapDefault(context, parameter))
                 .filter(Objects::nonNull)
                 .toList();
-
         if (method.getParameterCount() != parameters.size()) {
             throw new HttpException(400, "Bad request, request missing parameter");
         }
-
         try {
             final Object invocationResult = method.invoke(delegate, parameters.toArray(Object[]::new));
+            if (invocationResult instanceof Future<?> futureResult) {
+                return (Future<Object>) futureResult;
+            }
+            if (invocationResult instanceof CompletableFuture<?> completableFuture) {
+                return (Future<Object>) Future.fromCompletionStage(completableFuture);
+            }
             return Future.succeededFuture(invocationResult);
         } catch (Throwable e) {
             return Future.failedFuture(e);

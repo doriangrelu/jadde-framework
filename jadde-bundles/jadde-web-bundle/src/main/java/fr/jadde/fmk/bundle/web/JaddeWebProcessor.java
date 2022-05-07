@@ -5,6 +5,8 @@ import fr.jadde.fmk.app.context.configuration.Parameter;
 import fr.jadde.fmk.bundle.web.annotation.RestController;
 import fr.jadde.fmk.bundle.web.exceptions.BadEndpointDeclarationException;
 import fr.jadde.fmk.bundle.web.exceptions.WebInitializationException;
+import fr.jadde.fmk.bundle.web.handler.RequestLoggerHandler;
+import fr.jadde.fmk.bundle.web.handler.ResponseLoggerHandler;
 import fr.jadde.fmk.bundle.web.tools.Endpoint;
 import fr.jadde.fmk.bundle.web.tools.ControllerInvoker;
 import fr.jadde.fmk.bundle.web.tools.PathUtils;
@@ -76,8 +78,10 @@ public final class JaddeWebProcessor extends AbstractJaddeBeanProcessor {
         logger.info("Deploy {}[{}] --> {}[{}]", endpoint.method().toUpperCase(), endpoint.path(), delegate.getClass(), method.getName());
         this.makeRoute(router, endpoint.path(), HttpMethod.valueOf(endpoint.method()))
                 .handler(BodyHandler.create())
+                .handler(new RequestLoggerHandler())
                 .produces(endpoint.produces())
-                .respond(routingContext -> ControllerInvoker.doInvoke(routingContext, delegate, method));
+                .respond(routingContext -> ControllerInvoker.doInvoke(routingContext, delegate, method))
+                .handler(new ResponseLoggerHandler());
     }
 
     private Route makeRoute(final Router router, final String path, final HttpMethod method) {

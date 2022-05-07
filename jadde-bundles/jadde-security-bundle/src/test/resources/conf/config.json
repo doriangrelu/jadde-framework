@@ -1,11 +1,11 @@
 {
   "server": {
     "host": "127.0.0.1",
-    "port": 8000
+    "port": 8001
   },
   "authentication": {
     "clientId": "toto",
     "secret": "toto",
-    "host": "http://127.0.0.2:8080"
+    "host": "http://127.0.0.2:8000"
   }
 }
