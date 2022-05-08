@@ -1,9 +1,11 @@
 package fr.jadde.fmk.bundle.database.service;
 
 import com.speedment.jpastreamer.application.JPAStreamer;
-import fr.jadde.fmk.bundle.database.api.DatabaseManager;
-import fr.jadde.fmk.bundle.database.api.DatabaseManagerDeployer;
+import fr.jadde.fmk.bundle.database.api.DatabaseDriver;
+import fr.jadde.fmk.bundle.database.api.DatabaseDriverDeployer;
 import fr.jadde.fmk.container.exception.MissingEmptyConstructorException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -13,12 +15,15 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
-public class DatabaseManagerImpl implements DatabaseManager, DatabaseManagerDeployer {
+public class DatabaseDriverImpl implements DatabaseDriver, DatabaseDriverDeployer {
+
+    public static final Logger logger = LoggerFactory.getLogger(DatabaseDriverImpl.class);
 
     private final Map<String, JPAStreamer> streamers;
     private final Map<String, EntityManager> managers;
 
-    public DatabaseManagerImpl() {
+
+    public DatabaseDriverImpl() {
         this.streamers = new ConcurrentHashMap<>();
         this.managers = new ConcurrentHashMap<>();
     }
@@ -48,8 +53,9 @@ public class DatabaseManagerImpl implements DatabaseManager, DatabaseManagerDepl
     }
 
     @Override
-    public DatabaseManagerDeployer deploy(final String unitIdentifier, final Map<String, String> properties) {
+    public DatabaseDriverDeployer deploy(final String unitIdentifier, final Map<String, String> properties) {
         this.streamers.computeIfAbsent(unitIdentifier, id -> {
+            logger.info("Deploy {} persistence unit", unitIdentifier);
             final EntityManagerFactory emf = Persistence.createEntityManagerFactory(id, properties);
             this.managers.put(unitIdentifier, emf.createEntityManager());
             return JPAStreamer.of(emf);

@@ -4,10 +4,12 @@ import io.vertx.config.ConfigRetriever;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -48,6 +50,22 @@ public class Configuration {
             }
             return port;
         });
+    }
+
+    public Future<List<JsonObject>> databaseConfiguration() {
+        final Promise<List<JsonObject>> databaseInformation = Promise.promise();
+        this.retriever.getConfig().onSuccess(entries -> {
+            if (entries.containsKey("database")) {
+                databaseInformation.complete(
+                        Collections.unmodifiableList(entries.getJsonArray("database").stream()
+                                .filter(JsonObject.class::isInstance).map(JsonObject.class::cast)
+                                .toList())
+                );
+            } else {
+                databaseInformation.complete(Collections.emptyList());
+            }
+        }).onFailure(databaseInformation::fail);
+        return databaseInformation.future();
     }
 
     @SuppressWarnings("rawtypes")

@@ -1,0 +1,11 @@
+{
+  "database": [
+    {
+      "name": "my-unit",
+      "javax.persistence.jdbc.url": "jdbc:h2:mem:test_db",
+      "javax.persistence.jdbc.driver": "org.h2.Driver",
+      "javax.persistence.jdbc.user": "sa",
+      "javax.persistence.jdbc.password": ""
+    }
+  ]
+}

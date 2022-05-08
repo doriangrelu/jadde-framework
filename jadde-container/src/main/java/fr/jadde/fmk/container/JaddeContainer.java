@@ -43,7 +43,7 @@ public class JaddeContainer {
      * @param <T>         expected generic type
      * @return expected instance
      */
-    public <T> T getInstance(final Class<T> targetClass) {
+    public <T> T registerAndGetInstance(final Class<T> targetClass) {
         try {
             this.reentrantLock.lock();
             final T instance = this.createInstance(targetClass);
@@ -67,28 +67,6 @@ public class JaddeContainer {
             this.instances.computeIfAbsent(targetClass, clazz -> Collections.synchronizedList(new ArrayList<>())).add(instance);
         } finally {
             this.reentrantLock.unlock();
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> T createInstance(final Class<T> targetClass) {
-        final MissingEmptyConstructorException missingEmptyConstructorException = new MissingEmptyConstructorException("Missing an empty constructor for bean '" + targetClass + "'");
-        try {
-            final Constructor<T>[] constructors = (Constructor<T>[]) targetClass.getConstructors();
-            return Arrays.stream(constructors)
-                    .filter(constructor -> constructor.getParameterCount() == 0)
-                    .filter(AccessibleObject::trySetAccessible)
-                    .findFirst()
-                    .map(constructor -> {
-                        try {
-                            return constructor.newInstance();
-                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                            throw new IllegalStateException("Unexpected instantiation error '" + targetClass + "'");
-                        }
-                    })
-                    .orElseThrow(() -> missingEmptyConstructorException);
-        } catch (ClassCastException exception) {
-            throw missingEmptyConstructorException;
         }
     }
 
@@ -184,6 +162,28 @@ public class JaddeContainer {
         }
 
         throw new NotSingleBeanException("Multiples beans for class name '" + targetClassName + "'; Use Default or Qualifier");
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> T createInstance(final Class<T> targetClass) {
+        final MissingEmptyConstructorException missingEmptyConstructorException = new MissingEmptyConstructorException("Missing an empty constructor for bean '" + targetClass + "'");
+        try {
+            final Constructor<T>[] constructors = (Constructor<T>[]) targetClass.getConstructors();
+            return Arrays.stream(constructors)
+                    .filter(constructor -> constructor.getParameterCount() == 0)
+                    .filter(AccessibleObject::trySetAccessible)
+                    .findFirst()
+                    .map(constructor -> {
+                        try {
+                            return constructor.newInstance();
+                        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                            throw new IllegalStateException("Unexpected instantiation error '" + targetClass + "'");
+                        }
+                    })
+                    .orElseThrow(() -> missingEmptyConstructorException);
+        } catch (ClassCastException exception) {
+            throw missingEmptyConstructorException;
+        }
     }
 
     /**

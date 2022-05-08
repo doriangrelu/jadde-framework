@@ -10,11 +10,8 @@ import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
 import io.vertx.core.json.Json;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Allows you to start the assembly of the VertX application
@@ -35,7 +32,7 @@ public class JaddeApplicationAssembly {
         logger.info("Resolves beans processors");
         final List<JaddeBeanProcessor> processors = (List<JaddeBeanProcessor>) context.classpathResolver().resolveBySubtype(JaddeBeanProcessor.class)
                 .parallelStream()
-                .map(context.container()::getInstance)
+                .map(context.container()::registerAndGetInstance)
                 .filter(Objects::nonNull)
                 .toList();
 

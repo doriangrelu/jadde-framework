@@ -16,7 +16,7 @@ class JaddeContainerTest {
     void shouldResolvesSingleBean() {
         final JaddeContainer container = new JaddeContainer();
 
-        Assertions.assertThat(container.getInstance(A.class))
+        Assertions.assertThat(container.registerAndGetInstance(A.class))
                 .isNotNull()
                 .isInstanceOf(A.class);
 

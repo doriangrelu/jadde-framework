@@ -5,7 +5,7 @@ import com.speedment.jpastreamer.application.JPAStreamer;
 import javax.persistence.EntityManager;
 import java.util.stream.Stream;
 
-public interface DatabaseManager {
+public interface DatabaseDriver {
 
     JPAStreamer streamer();
 
