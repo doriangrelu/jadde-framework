@@ -16,7 +16,8 @@
     <modules>
         <module>jadde-web-bundle</module>
         <module>jadde-security-bundle</module>
-        <module>jadde-dispatcher</module>
+        <module>jadde-dispatcher-bundle</module>
+        <module>jadde-database-bundle</module>
     </modules>
 
 </project>

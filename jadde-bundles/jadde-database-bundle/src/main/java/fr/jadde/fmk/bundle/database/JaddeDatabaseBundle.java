@@ -1,9 +1,11 @@
-package fr.jadde.fmk.bundle.dispatcher;
+package fr.jadde.fmk.bundle.database;
 
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
 import fr.jadde.fmk.app.executor.bundle.api.AbstractJaddeBundle;
 
-public class JaddeDispatcherBundle extends AbstractJaddeBundle {
+public class JaddeDatabaseBundle extends AbstractJaddeBundle {
+
+    public static final String NAME = "jadde.database.bundle";
 
     @Override
     public boolean next(JaddeApplicationContext context) {
@@ -12,7 +14,7 @@ public class JaddeDispatcherBundle extends AbstractJaddeBundle {
 
     @Override
     public String getName() {
-        return null;
+        return NAME;
     }
 
 }

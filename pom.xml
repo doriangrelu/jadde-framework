@@ -32,6 +32,10 @@
         <javax.ws.rs-api.version>2.1.1</javax.ws.rs-api.version>
         <commons-lang3.version>3.12.0</commons-lang3.version>
         <slf4j-api.version>1.7.36</slf4j-api.version>
+        <jackson-databind.version>2.13.2.2</jackson-databind.version>
+        <jpastreamer-core.version>1.0.2</jpastreamer-core.version>
+        <build-helper-maven-plugin.version>3.2.0</build-helper-maven-plugin.version>
+        <hibernate-core.version>5.6.8.Final</hibernate-core.version>
     </properties>
 
     <modules>
@@ -91,6 +95,11 @@
                 <version>${guava.version}</version>
             </dependency>
             <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.jboss.weld.se</groupId>
                 <artifactId>weld-se-shaded</artifactId>
                 <version>${weld-se-shaded.version}</version>
@@ -109,6 +118,16 @@
                 <groupId>io.vertx</groupId>
                 <artifactId>vertx-auth-oauth2</artifactId>
                 <version>${vertx.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-core</artifactId>
+                <version>${hibernate-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.speedment.jpastreamer</groupId>
+                <artifactId>jpastreamer-core</artifactId>
+                <version>${jpastreamer-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.vertx</groupId>

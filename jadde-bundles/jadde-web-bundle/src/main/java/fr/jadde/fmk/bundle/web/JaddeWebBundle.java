@@ -6,7 +6,7 @@ import fr.jadde.fmk.bundle.web.verticle.JaddeApplicationServerVerticle;
 
 public class JaddeWebBundle extends AbstractJaddeBundle {
 
-    public static final String JADDE_WEB_BUNDLE = "jadde.web.bundle";
+    public static final String NAME = "jadde.web.bundle";
 
     @Override
     public boolean next(JaddeApplicationContext context) {
@@ -16,7 +16,7 @@ public class JaddeWebBundle extends AbstractJaddeBundle {
 
     @Override
     public String getName() {
-        return JADDE_WEB_BUNDLE;
+        return NAME;
     }
 
     @Override

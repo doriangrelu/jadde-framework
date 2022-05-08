@@ -10,7 +10,7 @@ import io.vertx.ext.auth.oauth2.OAuth2Options;
 import io.vertx.ext.web.client.OAuth2WebClientOptions;
 
 public class JaddeSecurityBundle extends AbstractJaddeBundle {
-    public static final String JADDE_SECURITY_BUNDLE = "jadde.security.bundle";
+    public static final String NAME = "jadde.security.bundle";
 
     @Override
     public boolean next(JaddeApplicationContext context) {
@@ -20,6 +20,6 @@ public class JaddeSecurityBundle extends AbstractJaddeBundle {
 
     @Override
     public String getName() {
-        return JADDE_SECURITY_BUNDLE;
+        return NAME;
     }
 }
