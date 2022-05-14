@@ -18,6 +18,7 @@
         <module>jadde-security-bundle</module>
         <module>jadde-dispatcher-bundle</module>
         <module>jadde-database-bundle</module>
+        <module>jadde-validation-bundle</module>
     </modules>
 
 </project>

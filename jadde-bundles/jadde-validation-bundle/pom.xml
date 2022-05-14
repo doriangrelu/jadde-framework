@@ -8,8 +8,8 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>jadde-web-bundle</artifactId>
-    <name>JADDE :: FMK :: BUNDLES :: WEB</name>
+    <name>JADDE :: FMK :: BUNDLES :: VALIDATION</name>
+    <artifactId>jadde-validation-bundle</artifactId>
 
     <dependencies>
         <dependency>
@@ -18,12 +18,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>javax.ws.rs</groupId>
-            <artifactId>javax.ws.rs-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.vertx</groupId>
-            <artifactId>vertx-web</artifactId>
+            <groupId>org.hibernate.validator</groupId>
+            <artifactId>hibernate-validator</artifactId>
+            <version>7.0.4.Final</version>
         </dependency>
         <dependency>
             <groupId>fr.jadde</groupId>
@@ -48,5 +45,6 @@
             </plugin>
         </plugins>
     </build>
+
 
 </project>

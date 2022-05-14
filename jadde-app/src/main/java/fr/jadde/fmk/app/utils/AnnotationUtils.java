@@ -35,7 +35,7 @@ public class AnnotationUtils {
     }
 
     private static Predicate<Annotation> annotationMatcher(final Class<? extends Annotation> annotationName) {
-        return annotation -> annotation.annotationType().isAnnotationPresent(annotationName);
+        return annotation -> annotation.annotationType().isAnnotationPresent(annotationName) || annotation.annotationType().isAssignableFrom(annotationName);
     }
 
 }

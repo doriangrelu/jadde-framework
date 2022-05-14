@@ -17,13 +17,6 @@ import javax.persistence.FlushModeType;
 public class DatabaseConfigurationTest extends AbstractJaddeTest {
 
     @Test
-    void shouldInitializeDatabaseContext(final Vertx vertx, final VertxTestContext testContext) {
-        final JaddeApplicationContext context = JaddeApplication.start(FakeDatabaseApplication.class, new String[0], vertx);
-        Assertions.assertThat(context.container().resolve(DatabaseDriver.class)).isNotEmpty();
-        testContext.completeNow();
-    }
-
-    @Test
     void shouldWorkFine(final Vertx vertx, final VertxTestContext testContext) {
         final JaddeApplicationContext context = JaddeApplication.start(FakeDatabaseApplication.class, new String[0], vertx);
         final DatabaseDriver driver = context.container().resolve(DatabaseDriver.class).orElseThrow();
