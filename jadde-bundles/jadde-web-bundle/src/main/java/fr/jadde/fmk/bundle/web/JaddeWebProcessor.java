@@ -3,6 +3,7 @@ package fr.jadde.fmk.bundle.web;
 import fr.jadde.fmk.app.executor.bean.api.AbstractJaddeBeanProcessor;
 import fr.jadde.fmk.app.context.configuration.Parameter;
 import fr.jadde.fmk.bundle.web.annotation.RestController;
+import fr.jadde.fmk.bundle.web.api.MiddlewareProcessor;
 import fr.jadde.fmk.bundle.web.exceptions.BadEndpointDeclarationException;
 import fr.jadde.fmk.bundle.web.exceptions.WebInitializationException;
 import fr.jadde.fmk.bundle.web.handler.RequestLoggerHandler;
@@ -79,6 +80,7 @@ public final class JaddeWebProcessor extends AbstractJaddeBeanProcessor {
         this.makeRoute(router, endpoint.path(), HttpMethod.valueOf(endpoint.method()))
                 .handler(BodyHandler.create())
                 .handler(new RequestLoggerHandler())
+                .handler(this.context().container().resolve(MiddlewareProcessor.class).orElseThrow().handler(delegate, method))
                 .produces(endpoint.produces())
                 .respond(routingContext -> ControllerInvoker.doInvoke(routingContext, delegate, method))
                 .handler(new ResponseLoggerHandler());

@@ -2,6 +2,7 @@ package fr.jadde.fmk.bundle.web;
 
 import fr.jadde.fmk.app.executor.bundle.api.AbstractJaddeBundle;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import fr.jadde.fmk.bundle.web.api.MiddlewareProcessor;
 import fr.jadde.fmk.bundle.web.verticle.JaddeApplicationServerVerticle;
 
 public class JaddeWebBundle extends AbstractJaddeBundle {
@@ -11,6 +12,7 @@ public class JaddeWebBundle extends AbstractJaddeBundle {
     @Override
     public boolean next(JaddeApplicationContext context) {
         context.deploy(JaddeApplicationServerVerticle.class);
+        context.container().bindInstance(new MiddlewareProcessor());
         return this.handleNext(context);
     }
 

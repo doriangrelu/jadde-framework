@@ -3,16 +3,22 @@ package fr.jadde.fmk.bundle.validation;
 import fr.jadde.fmk.app.executor.bean.api.AbstractJaddeBeanProcessor;
 import fr.jadde.fmk.app.utils.AnnotationUtils;
 import fr.jadde.fmk.bundle.validation.annotation.Validated;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.stream.Stream;
+
+@Slf4j
 public class JaddeValidationProcessor extends AbstractJaddeBeanProcessor {
 
-    private static final Logger logger = LoggerFactory.getLogger(JaddeValidationProcessor.class);
+
 
     @Override
     public void process(Object target) {
+        Stream.of(target.getClass().getMethods()).forEach(method -> {
+            method.
 
+
+        });
     }
 
     @Override

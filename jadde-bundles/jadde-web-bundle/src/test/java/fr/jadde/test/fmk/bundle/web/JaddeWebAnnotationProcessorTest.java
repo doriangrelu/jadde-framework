@@ -1,6 +1,7 @@
 package fr.jadde.test.fmk.bundle.web;
 
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import fr.jadde.fmk.bundle.web.api.MiddlewareProcessor;
 import fr.jadde.fmk.tests.AbstractJaddeTest;
 import fr.jadde.fmk.tests.http.TestHttpClient;
 import fr.jadde.test.fmk.bundle.web.mock.FakeApplication;
@@ -20,6 +21,14 @@ class JaddeWebAnnotationProcessorTest extends AbstractJaddeTest {
         this.setVertxTestContext(testContext);
         final JaddeApplicationContext context = FakeApplication.start(FakeApplication.class, new String[0], vertx);
         final TestHttpClient testClient = this.httpClient(context);
+
+        context.container().resolve(MiddlewareProcessor.class).orElseThrow().registerRoute(routingContext -> {
+            System.out.println("New call for route '" + routingContext.normalizedPath() + "'");
+        });
+
+        context.container().resolve(MiddlewareProcessor.class).orElseThrow().registerInvoker((delegate, invoker) -> {
+            System.out.println("New call for invoker " + delegate.getClass().getSimpleName() + " --> '" + invoker.getName() + "'");
+        });
 
         testClient.request(HttpMethod.GET, "/my-root/hello/dorian")
                 .send().onComplete(responseAsync -> {

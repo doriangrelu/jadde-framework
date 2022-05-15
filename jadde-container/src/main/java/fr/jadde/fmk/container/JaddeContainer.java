@@ -24,7 +24,7 @@ import java.util.stream.Stream;
  */
 public class JaddeContainer {
 
-    private final Map<Class<?>, List<Object>> instances;
+    private final Set<Object> instances;
 
     private final Lock reentrantLock;
 
@@ -32,7 +32,7 @@ public class JaddeContainer {
      * Ctor.
      */
     public JaddeContainer() {
-        this.instances = new ConcurrentHashMap<>();
+        this.instances = Collections.synchronizedSet(new LinkedHashSet<>());
         this.reentrantLock = new ReentrantLock();
     }
 
@@ -47,11 +47,32 @@ public class JaddeContainer {
         try {
             this.reentrantLock.lock();
             final T instance = this.createInstance(targetClass);
-            this.instances.computeIfAbsent(targetClass, clazz -> Collections.synchronizedList(new ArrayList<>())).add(instance);
-            return instance;
+            return this.bindAndGetInstance(instance);
         } finally {
             this.reentrantLock.unlock();
         }
+    }
+
+    /**
+     * Binds new instance in container
+     *
+     * @param instance target instance
+     * @param <T>      target type
+     * @return instance
+     */
+    public <T> T bindAndGetInstance(final T instance) {
+        this.bindInstance(instance);
+        return instance;
+    }
+
+    /**
+     * Binds new instance in container
+     *
+     * @param instance target instance
+     * @param <T>      target type
+     */
+    public <T> void bindInstance(final T instance) {
+        this.instances.add(instance);
     }
 
     /**
@@ -64,7 +85,7 @@ public class JaddeContainer {
         try {
             this.reentrantLock.lock();
             final T instance = this.createInstance(targetClass);
-            this.instances.computeIfAbsent(targetClass, clazz -> Collections.synchronizedList(new ArrayList<>())).add(instance);
+            this.bindInstance(instance);
         } finally {
             this.reentrantLock.unlock();
         }
@@ -79,8 +100,7 @@ public class JaddeContainer {
      */
     @SuppressWarnings("unchecked")
     public <T> Optional<T> tryResolve(final Annotation... annotations) {
-        return (Optional<T>) this.instances.values()
-                .stream()
+        return (Optional<T>) this.instances.stream()
                 .filter(o -> Stream.of(annotations).allMatch(a -> o.getClass().isAnnotationPresent(a.getClass())))
                 .findFirst();
     }
@@ -96,9 +116,9 @@ public class JaddeContainer {
     public <T> List<T> resolveAll(final Class<T> targetClassName) {
         try {
             final List<T> result = new ArrayList<>();
-            this.instances.forEach((aClass, objects) -> {
-                if (targetClassName.isAssignableFrom(aClass)) {
-                    result.addAll((Collection<? extends T>) objects);
+            this.instances.forEach(object -> {
+                if (targetClassName.isAssignableFrom(object.getClass())) {
+                    result.add((T) object);
                 }
             });
             return Collections.unmodifiableList(result);
@@ -110,10 +130,7 @@ public class JaddeContainer {
 
     @SuppressWarnings("unchecked")
     public <T> List<T> resolveAll() {
-        return (List<T>) this.instances.values()
-                .stream()
-                .flatMap(Collection::stream)
-                .toList();
+        return (List<T>) List.copyOf(this.instances);
     }
 
     /**
