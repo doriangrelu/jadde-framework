@@ -5,6 +5,7 @@ import fr.jadde.fmk.app.executor.bean.annotation.Start;
 import fr.jadde.fmk.app.executor.bean.annotation.Stop;
 import fr.jadde.fmk.app.executor.bean.tools.BeanUtils;
 import fr.jadde.fmk.app.utils.AnnotationUtils;
+import io.vertx.core.Future;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.annotation.Annotation;
