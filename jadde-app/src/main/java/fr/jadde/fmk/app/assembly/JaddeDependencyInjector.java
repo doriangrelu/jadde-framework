@@ -72,12 +72,13 @@ class JaddeDependencyInjector {
             }
             field.setAccessible(false);
         }, () -> {
-            log.warn("Cannot process field injection for field '{}' in class '{}' because missing dependency '{}' in container",
-                    field.getName(), target.getClass().getName(), dependencyClassName.getName()
-            );
             if (AnnotationUtils.getAnnotation(field, Inject.class).orElseThrow().required()) {
                 throw new CannotStartApplicationException("Cannot start application because missing required dependency '" + dependencyClassName.getName() + "' " +
                         "for injection in '" + target.getClass() + "'");
+            } else {
+                log.warn("Cannot process optional field injection for field '{}' in class '{}' because missing dependency '{}' in container",
+                        field.getName(), target.getClass().getName(), dependencyClassName.getName()
+                );
             }
         });
     }

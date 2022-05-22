@@ -3,7 +3,6 @@ package fr.jadde.fmk.app.assembly;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
 import fr.jadde.fmk.app.executor.bean.JaddeBeanExecutor;
 import fr.jadde.fmk.app.executor.bean.api.JaddeBeanProcessor;
-import fr.jadde.fmk.app.executor.bean.tools.BeanUtils;
 import fr.jadde.fmk.app.executor.bundle.JaddeBundleExecutor;
 import fr.jadde.fmk.app.executor.bundle.api.JaddeBundle;
 import fr.jadde.fmk.container.annotation.JaddeBean;
@@ -55,7 +54,10 @@ public class JaddeApplicationAssembly {
                 .forEach(context.container()::registerInstance);
 
         log.debug("Handle dependency injection");
-        this.processFieldInjection(context);
+        JaddeContainerLifecycle.doInject(context);
+        JaddeContainerLifecycle.hookStart(context);
+        JaddeContainerLifecycle.hookStop(context);
+
 
         log.info("'{}' processors found, start application processing", processors.size());
         log.debug("Processor list -> {}", Json.encode(processors.stream().map(Object::toString).toList()));
@@ -67,13 +69,6 @@ public class JaddeApplicationAssembly {
 
         stopWatch.stop();
         log.info("Application successfully assembled in {}ms", stopWatch.getTime(TimeUnit.MILLISECONDS));
-    }
-
-    private void processFieldInjection(final JaddeApplicationContext context) {
-        final JaddeDependencyInjector injectorProcessor = new JaddeDependencyInjector(context);
-        BeanUtils.getSafeBeans(context).parallelStream()
-                .filter(injectorProcessor::doesSupport)
-                .forEach(injectorProcessor::process);
     }
 
 }

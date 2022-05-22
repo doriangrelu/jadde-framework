@@ -1,4 +1,4 @@
-package fr.jadde.test.fmk.app.bean;
+package fr.jadde.test.fmk.app.container;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -27,6 +27,7 @@ class JaddeDependencyInjectorTest extends JaddeApplication {
         Assertions.assertThat(myComplexService).isNotEmpty().containsInstanceOf(MyFirstService.class);
 
         Assertions.assertThat(myService.orElseThrow().myFirstService()).isNotNull().isInstanceOf(MyFirstService.class);
+        Assertions.assertThat(myService.orElseThrow().name()).isNotNull().isEqualTo("Dorian");
         Assertions.assertThat(myService.orElseThrow().applicationContext()).isNotNull().isInstanceOf(JaddeApplicationContext.class);
         Assertions.assertThat(myService.orElseThrow().myFirstServices()).hasSize(1);
 
