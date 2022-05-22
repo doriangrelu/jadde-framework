@@ -19,6 +19,7 @@
         <module>jadde-dispatcher-bundle</module>
         <module>jadde-database-bundle</module>
         <module>jadde-validation-bundle</module>
+        <module>jadde-openapi-bundle</module>
     </modules>
 
 </project>

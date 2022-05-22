@@ -6,16 +6,20 @@ import fr.jadde.fmk.bundle.web.annotation.RestController;
 import fr.jadde.fmk.bundle.web.api.MiddlewareProcessor;
 import fr.jadde.fmk.bundle.web.exceptions.BadEndpointDeclarationException;
 import fr.jadde.fmk.bundle.web.exceptions.WebInitializationException;
+import fr.jadde.fmk.bundle.web.handler.FailureHandler;
 import fr.jadde.fmk.bundle.web.handler.RequestLoggerHandler;
 import fr.jadde.fmk.bundle.web.handler.ResponseLoggerHandler;
 import fr.jadde.fmk.bundle.web.tools.Endpoint;
 import fr.jadde.fmk.bundle.web.tools.ControllerInvoker;
 import fr.jadde.fmk.bundle.web.tools.PathUtils;
 import io.vertx.core.Future;
+import io.vertx.core.Handler;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Route;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.HttpException;
 import io.vertx.ext.web.handler.LoggerHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -31,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -77,12 +82,14 @@ public final class JaddeWebProcessor extends AbstractJaddeBeanProcessor {
 
     private void processEndpointRegistration(final Router router, final Object delegate, final Method method, final Endpoint endpoint) {
         logger.info("Deploy {}[{}] --> {}[{}]", endpoint.method().toUpperCase(), endpoint.path(), delegate.getClass(), method.getName());
+        final MiddlewareProcessor middlewareProcessor = this.context().container().unsafeResolve(MiddlewareProcessor.class);
         this.makeRoute(router, endpoint.path(), HttpMethod.valueOf(endpoint.method()))
                 .handler(BodyHandler.create())
                 .handler(new RequestLoggerHandler())
-                .handler(this.context().container().resolve(MiddlewareProcessor.class).orElseThrow().handler(delegate, method))
+                .handler(this.context().container().resolve(MiddlewareProcessor.class).orElseThrow().handler())
+                .failureHandler(new FailureHandler())
                 .produces(endpoint.produces())
-                .respond(routingContext -> ControllerInvoker.doInvoke(routingContext, delegate, method))
+                .respond(routingContext -> ControllerInvoker.doInvoke(routingContext, delegate, method, middlewareProcessor))
                 .handler(new ResponseLoggerHandler());
     }
 
@@ -150,7 +157,7 @@ public final class JaddeWebProcessor extends AbstractJaddeBeanProcessor {
 
     @Override
     public int priorityOrder() {
-        return 2;
+        return -1;
     }
 
 }

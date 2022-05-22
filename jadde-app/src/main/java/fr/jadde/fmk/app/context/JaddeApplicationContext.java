@@ -5,7 +5,7 @@ import fr.jadde.fmk.app.context.tools.ClasspathResolver;
 import fr.jadde.fmk.app.context.configuration.Configuration;
 import fr.jadde.fmk.app.exception.ImmutableContextViolationException;
 import fr.jadde.fmk.app.verticle.AbstractJaddeVerticle;
-import fr.jadde.fmk.container.JaddeContainer;
+import fr.jadde.fmk.container.api.JaddeContainer;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;

@@ -44,6 +44,7 @@
         <module>jadde-container</module>
         <module>jadde-bundles</module>
         <module>jadde-tests</module>
+        <module>jadde-maven-plugins</module>
     </modules>
 
     <dependencies>

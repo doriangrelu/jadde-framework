@@ -1,5 +1,6 @@
 package fr.jadde.fmk.tests;
 
+import ch.qos.logback.classic.Level;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
 import fr.jadde.fmk.tests.http.TestHttpClient;
 import io.vertx.junit5.VertxExtension;
@@ -12,6 +13,11 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractJaddeTest {
 
     private static final Logger logger = LoggerFactory.getLogger("TestLogs");
+
+    static {
+        ch.qos.logback.classic.Logger rootLogger = (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        rootLogger.setLevel(Level.TRACE);
+    }
 
     protected VertxTestContext vertxTestContext;
 
@@ -27,7 +33,7 @@ public abstract class AbstractJaddeTest {
         return new TestHttpClient(context, vertxTestContext);
     }
 
-    protected void log(final String message, final Object ...args) {
+    protected void log(final String message, final Object... args) {
         logger.info("### " + message, args);
     }
 

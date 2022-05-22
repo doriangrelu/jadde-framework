@@ -23,7 +23,7 @@ public class JaddeWebBundle extends AbstractJaddeBundle {
 
     @Override
     public short priorityOrder() {
-        return 2;
+        return -3;
     }
 
 }

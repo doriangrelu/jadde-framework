@@ -3,7 +3,7 @@ package fr.jadde.fmk.app;
 import fr.jadde.fmk.app.assembly.JaddeApplicationAssembly;
 import fr.jadde.fmk.app.context.tools.ClasspathResolver;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
-import fr.jadde.fmk.container.JaddeContainer;
+import fr.jadde.fmk.container.api.JaddeContainer;
 import io.vertx.core.Vertx;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;

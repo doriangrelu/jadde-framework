@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 class JaddeWebAnnotationProcessorTest extends AbstractJaddeTest {
 
     @Test
-    void shouldProcessAWebService(Vertx vertx, VertxTestContext testContext) {
+    void shouldProcessAWebService(final Vertx vertx, final VertxTestContext testContext) {
         this.log("Start fake application test");
         this.setVertxTestContext(testContext);
         final JaddeApplicationContext context = FakeApplication.start(FakeApplication.class, new String[0], vertx);
@@ -26,7 +26,7 @@ class JaddeWebAnnotationProcessorTest extends AbstractJaddeTest {
             System.out.println("New call for route '" + routingContext.normalizedPath() + "'");
         });
 
-        context.container().resolve(MiddlewareProcessor.class).orElseThrow().registerInvoker((delegate, invoker) -> {
+        context.container().resolve(MiddlewareProcessor.class).orElseThrow().registerInvoker((delegate, invoker, args) -> {
             System.out.println("New call for invoker " + delegate.getClass().getSimpleName() + " --> '" + invoker.getName() + "'");
         });
 
@@ -40,7 +40,7 @@ class JaddeWebAnnotationProcessorTest extends AbstractJaddeTest {
                 .send(new JsonObject().put("name", "michel"))
                 .onComplete(responseAsync -> {
                     Assertions.assertThat(responseAsync.result().statusCode()).isEqualTo(200);
-                    JsonObject body = responseAsync.result().body().toJsonObject();
+                    final JsonObject body = responseAsync.result().body().toJsonObject();
                     Assertions.assertThat(body.getString("name")).isEqualTo("michel");
                     Assertions.assertThat(body.getString("id")).isEqualTo("dodo");
                     Assertions.assertThat(body.getString("uuid")).isEqualTo("jean");

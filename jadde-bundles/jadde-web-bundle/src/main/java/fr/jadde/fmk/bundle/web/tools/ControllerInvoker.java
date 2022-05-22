@@ -1,6 +1,7 @@
 package fr.jadde.fmk.bundle.web.tools;
 
 import fr.jadde.fmk.bundle.web.annotation.BodyParam;
+import fr.jadde.fmk.bundle.web.api.MiddlewareProcessor;
 import io.vertx.core.Future;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
@@ -24,9 +25,9 @@ public class ControllerInvoker {
     private static final Logger logger = LoggerFactory.getLogger(ControllerInvoker.class);
 
     @SuppressWarnings("unchecked")
-    public static Future<Object> doInvoke(final RoutingContext context, final Object delegate, final Method method) {
-        logger.info("[http-{}] DISPATCH --> {}[{}]", context.request().headers().get("uuid"), delegate.getClass().getName(), method.getName());
-        final List<Object> parameters = Stream.of(method.getParameters())
+    public static Future<Object> doInvoke(final RoutingContext context, final Object invoker, final Method delegate, final MiddlewareProcessor middlewareProcessor) {
+        logger.info("[http-{}] DISPATCH --> {}[{}]", context.request().headers().get("uuid"), invoker.getClass().getName(), delegate.getName());
+        final List<Object> parameters = Stream.of(delegate.getParameters())
                 .map(parameter -> mapRoutingContext(context, parameter))
                 .map(parameter -> mapPathParameters(context, parameter))
                 .map(parameter -> mapHeaderParameters(context, parameter))
@@ -35,11 +36,13 @@ public class ControllerInvoker {
                 .map(parameter -> mapDefault(context, parameter))
                 .filter(Objects::nonNull)
                 .toList();
-        if (method.getParameterCount() != parameters.size()) {
+        if (delegate.getParameterCount() != parameters.size()) {
             throw new HttpException(400, "Bad request, request missing parameter");
         }
         try {
-            final Object invocationResult = method.invoke(delegate, parameters.toArray(Object[]::new));
+            final Object[] arguments = parameters.toArray(Object[]::new);
+            handleMiddleware(invoker, delegate, arguments, middlewareProcessor);
+            final Object invocationResult = delegate.invoke(invoker, arguments);
             if (invocationResult instanceof Future<?> futureResult) {
                 return (Future<Object>) futureResult;
             }
@@ -50,6 +53,10 @@ public class ControllerInvoker {
         } catch (Throwable e) {
             return Future.failedFuture(e);
         }
+    }
+
+    private static void handleMiddleware(final Object invoker, final Method delegate, final Object[] arguments, final MiddlewareProcessor middlewareProcessor) {
+        middlewareProcessor.next(invoker, delegate, arguments);
     }
 
     private static Object mapPathParameters(final RoutingContext context, final Object target) {

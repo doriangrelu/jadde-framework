@@ -1,6 +1,7 @@
 package fr.jadde.fmk.app.executor.bundle;
 
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import fr.jadde.fmk.app.executor.bean.tools.BeanUtils;
 import fr.jadde.fmk.app.executor.bundle.api.JaddeBundle;
 import io.vertx.core.impl.logging.Logger;
 import io.vertx.core.impl.logging.LoggerFactory;
@@ -19,19 +20,18 @@ public class JaddeBundleExecutor {
     }
 
     public void execute(final JaddeApplicationContext context) {
-        logger.info("Bundle build start");
+        logger.debug("Bundle build start");
         final List<JaddeBundle> beans = this.sortBundles(context.container().resolveAll(JaddeBundle.class));
         final Queue<JaddeBundle> bundleQueue = new LinkedList<>(beans);
         if (!bundleQueue.isEmpty()) {
             final JaddeBundle startBundle = bundleQueue.poll();
             this.handleSetBundleGraph(startBundle, bundleQueue);
-            logger.info("Bundle start dequeue '" + this.formatClassName(startBundle) + "'");
+            logger.debug("Bundle start dequeue '" + this.formatClassName(startBundle) + "'");
             final boolean status = startBundle.next(context);
-            logger.info("Bundle dequeue finished with status '" + status + "'");
+            logger.debug("Bundle dequeue finished with status '" + status + "'");
         } else {
             logger.warn("Have not bundle");
         }
-
     }
 
     public void handleSetBundleGraph(final JaddeBundle currentBundle, final Queue<JaddeBundle> nexts) {

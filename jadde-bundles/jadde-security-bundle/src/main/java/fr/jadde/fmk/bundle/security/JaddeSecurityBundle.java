@@ -22,4 +22,9 @@ public class JaddeSecurityBundle extends AbstractJaddeBundle {
     public String getName() {
         return NAME;
     }
+
+    @Override
+    public short priorityOrder() {
+        return -2;
+    }
 }

@@ -3,13 +3,15 @@ package fr.jadde.fmk.app.executor.bean;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
 import fr.jadde.fmk.app.executor.bean.api.BeanWithContext;
 import fr.jadde.fmk.app.executor.bean.api.JaddeBeanProcessor;
-import fr.jadde.fmk.app.executor.bundle.api.JaddeBundle;
 import fr.jadde.fmk.app.executor.bean.tools.BeanUtils;
+import fr.jadde.fmk.app.executor.bundle.api.JaddeBundle;
 import io.vertx.core.Promise;
-import io.vertx.core.impl.logging.Logger;
-import io.vertx.core.impl.logging.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Allows you to process a bean
@@ -17,9 +19,8 @@ import java.util.*;
  * @author Dorian GRELU
  * @version Avril. 2022
  */
+@Slf4j
 public class JaddeBeanExecutor {
-
-    private static final Logger logger = LoggerFactory.getLogger(JaddeBeanExecutor.class);
 
     private final List<JaddeBeanProcessor> processors;
 
@@ -40,13 +41,16 @@ public class JaddeBeanExecutor {
      * @param context target application context
      */
     public void execute(final JaddeApplicationContext context) {
-        BeanUtils.getSafeBeans(context, JaddeBundle.class).parallelStream().forEach(bean -> {
+        final List<Object> beans = BeanUtils.getSafeBeans(context, JaddeBundle.class);
+        log.info("Starts bean processing for {} bean(s)", beans.size());
+        beans.parallelStream().forEach(bean -> {
             this.handleContext(bean, context);
             context.container().resolve(bean.getClass()).ifPresentOrElse(o -> {
-                logger.info("Start process '" + bean.getClass() + "' processing");
+                log.debug("Start process '" + bean.getClass() + "' processing");
                 this.processInstance(o, processors);
-            }, () -> logger.warn("Cannot process bean '" + bean.getClass() + "' because missing in Jadde container"));
+            }, () -> log.warn("Cannot process bean '" + bean.getClass() + "' because missing in Jadde container"));
         });
+        log.info("Bean processing successfully ended for {} bean(s)", beans.size());
     }
 
     private void handleContext(final Object bean, final JaddeApplicationContext context) {
@@ -69,7 +73,7 @@ public class JaddeBeanExecutor {
      * The processor instanciator !
      *
      * @param processors target available processors
-     * @return the Jadde Processor ! 😍
+     * @return the Jadde Processor
      */
     public static JaddeBeanExecutor create(final List<JaddeBeanProcessor> processors) {
         return new JaddeBeanExecutor(processors);

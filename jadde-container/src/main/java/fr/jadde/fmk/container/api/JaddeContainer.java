@@ -1,4 +1,4 @@
-package fr.jadde.fmk.container;
+package fr.jadde.fmk.container.api;
 
 import fr.jadde.fmk.container.annotation.Default;
 import fr.jadde.fmk.container.annotation.Qualifier;
@@ -135,9 +135,6 @@ public class JaddeContainer {
 
     /**
      * Provides real instance resolving
-     * The Jadde container return by default a proxy object
-     * This method bypass the proxy object
-     * In most cases you must use the proxy object
      *
      * @param targetClassName target class name
      * @param qualifier       target qualifier
@@ -149,7 +146,44 @@ public class JaddeContainer {
         if (matchInstances.size() > 1) {
             return this.resolveConflict(targetClassName, matchInstances, qualifier);
         }
+        if (matchInstances.isEmpty()) {
+            return Optional.empty();
+        }
         return Optional.ofNullable(matchInstances.get(0));
+    }
+
+    /**
+     * Provides real instance resolving
+     *
+     * @param targetClassName target class name
+     * @param <T>             expected generic beans type
+     * @return optional real instance
+     */
+    public <T> Optional<T> resolve(final Class<T> targetClassName) {
+        return this.resolve(targetClassName, null);
+    }
+
+    public <T> T unsafeResolve(final Class<T> targetClassName, final String qualifier) {
+        final List<T> matchInstances = this.resolveAll(targetClassName);
+        if (matchInstances.size() > 1) {
+            return this.resolveConflict(targetClassName, matchInstances, qualifier).orElse(null);
+        }
+        if (matchInstances.isEmpty()) {
+            return null;
+        }
+        return matchInstances.get(0);
+    }
+
+
+    /**
+     * Provides real instance resolving
+     *
+     * @param targetClassName target class name
+     * @param <T>             expected generic beans type
+     * @return real instance or null
+     */
+    public <T> T unsafeResolve(final Class<T> targetClassName) {
+        return this.unsafeResolve(targetClassName, null);
     }
 
     private <T> Optional<T> resolveConflict(final Class<T> targetClassName, final List<T> conflictInstances, final String qualifier) {
@@ -203,18 +237,5 @@ public class JaddeContainer {
         }
     }
 
-    /**
-     * Provides real instance resolving
-     * The Jadde container return by default a proxy object
-     * This method bypass the proxy object
-     * In most cases you must use the proxy object
-     *
-     * @param targetClassName target class name
-     * @param <T>             expected generic beans type
-     * @return optional real instance
-     */
-    public <T> Optional<T> resolve(final Class<T> targetClassName) {
-        return this.resolve(targetClassName, null);
-    }
 
 }

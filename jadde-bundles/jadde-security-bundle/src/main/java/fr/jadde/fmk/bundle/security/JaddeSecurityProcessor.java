@@ -169,7 +169,7 @@ public class JaddeSecurityProcessor extends AbstractJaddeBeanProcessor {
 
     @Override
     public int priorityOrder() {
-        return 1;
+        return -2;
     }
 
 

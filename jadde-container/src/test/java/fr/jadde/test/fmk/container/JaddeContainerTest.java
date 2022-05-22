@@ -1,6 +1,6 @@
 package fr.jadde.test.fmk.container;
 
-import fr.jadde.fmk.container.JaddeContainer;
+import fr.jadde.fmk.container.api.JaddeContainer;
 import fr.jadde.fmk.container.exception.NotSingleBeanException;
 import fr.jadde.test.fmk.container.mock.*;
 import org.assertj.core.api.Assertions;

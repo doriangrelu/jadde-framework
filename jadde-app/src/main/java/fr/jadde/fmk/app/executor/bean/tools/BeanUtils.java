@@ -2,6 +2,8 @@ package fr.jadde.fmk.app.executor.bean.tools;
 
 import fr.jadde.fmk.app.executor.bean.api.JaddeBeanProcessor;
 import fr.jadde.fmk.app.context.JaddeApplicationContext;
+import fr.jadde.fmk.app.utils.AnnotationUtils;
+import fr.jadde.fmk.container.annotation.ExcludeBeanProcessing;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -16,6 +18,7 @@ public final class BeanUtils {
         return beans.stream()
                 .filter(bean -> !(JaddeBeanProcessor.class.isAssignableFrom(bean.getClass())))
                 .filter(bean -> !(JaddeApplicationContext.class.isAssignableFrom(bean.getClass())))
+                .filter(bean -> !AnnotationUtils.isAnnotationPresent(bean.getClass(), ExcludeBeanProcessing.class))
                 .filter(bean -> exclude(bean, excludes))
                 .toList();
     }
