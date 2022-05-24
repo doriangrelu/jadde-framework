@@ -33,6 +33,7 @@ system of qualifier or bean by default exists)
 Here is an example of what can be done:
 
     @JaddeBean
+    @Qualifier("aQualifier")
     public class MySecondService {
     
         @Inject
@@ -49,6 +50,12 @@ Here is an example of what can be done:
     
         @Inject
         private List<MyFirstService> myFirstServices;
+
+    }
+
+    @JaddeBean
+    @Default
+    public class ADefaultBean {
 
     }
 
